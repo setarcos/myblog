@@ -147,7 +147,7 @@ footer{
 }
 
 .banner{
-    border-bottom: 12px solid #222;
+    border-bottom: 2px solid #222;
     padding: 0 12px;
     position: relative;
 }
@@ -243,7 +243,7 @@ section.content{
     background-color: #ededed;
     list-style-type: none;
     float: left;
-    width: 272px;
+    width: 352px;
     margin-right: 24px;
     margin-bottom: 24px;
     padding: 12px;
@@ -264,30 +264,30 @@ section.content{
 }
 
 .listing li p{
-    font-size: 10px;
-    line-height: 12px;
-    margin-bottom: 12px;
+    font-size: 12px;
+    line-height: 14px;
+    margin-bottom: 14px;
 }
 
 
 .listing h3{
     border-bottom: 1px solid #ccc;
-    font-size: 12px;
-    line-height: 18px;
-    margin-bottom: 6px;
+    font-size: 14px;
+    line-height: 20px;
+    margin-bottom: 8px;
 }
 
 .listing time{
     display:block;
     border-top: 1px solid #ccc;
     padding-top: 4px;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 /* Content */
 
 article.post p{
-    font-size: 12px;
+    font-size: 14px;
     line-height: 24px;
     margin: 6px 0;
 }
@@ -342,9 +342,9 @@ h1 a, h2 a, h3 a{
 nav.post_nav{
     background-color: #efefef;
     position: fixed;
-    width: 124px;
-    margin-left: -186px;
-    font-size: 12px;
+    width: 132px;
+    margin-left: -198px;
+    font-size: 14px;
     padding: 12px;
     padding-right: 24px;
     -moz-box-shadow: 0px 2px 4px #ccc; /* FF3.5+ */

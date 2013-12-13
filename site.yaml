@@ -20,27 +20,22 @@ context:
                 type: page
                 url: index.html
             -
-                name: Portfolio
-                description: Portfolio
-                css_class: portfolio
-                type: node
-                url: portfolio
-            -
                 name: Blog
                 description: Blog
                 css_class: blog
                 type: node
                 url: blog
             -
-                name: About
-                description: About
-                css_class: about
-                type: page
-                url: about.html
+                name: Project
+                description: Project
+                css_class: proj
+                type: node
+                url: proj
 meta:
     nodemeta: meta.yaml
     created: !!timestamp 2010-01-01 00:00:00
     author: Lakshmi Vyasarajan
+    charset: utf-8
 sorter:
     time:
         attr:

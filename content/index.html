@@ -1,20 +1,15 @@
 ---
 extends: base.j2
 default_block: main
-title: BASIC - A hyde website
-description: Home page for the BASIC hyde template
+title: Pluto - A hyde website
+description: Home page for my personal interest.
 ---
 
-{% from "macros.j2" import render_excerpt with context %}
-<section class="blog_excerpt">
-{% set latest = site.content.walk_resources_sorted_by_time()|first %}
-
-{% if latest -%}
-{{ render_excerpt(latest, 'post') }}
-
-<a class="button white medium"
-    href="{{ content_url(latest.url) }}">Read more&hellip;</a>
-
-{%- endif %}
-
-</section>
+<ul class="listing clearfix">
+    <li><h3><a href="/blog/">Blogs</a></h3>
+    记录我的一些工作日志
+    </li>
+    <li><h3><a href="/proj/">Project</a></h3>
+    记录我的一些项目
+    </li>
+</ul>
