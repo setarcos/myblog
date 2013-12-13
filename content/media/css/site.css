@@ -49,7 +49,6 @@ table {
 a {
     color: #37e;
     text-decoration: underline;
-    text-shadow: 0px 2px 0px #fff;
 }
 
 a:hover{
@@ -61,12 +60,11 @@ body{
     background-color: #efefef;
     padding: 0;
     margin: 0;
-    text-shadow: 0px 2px 0px #efefef;
 }
 
 #container{
           background-color: #eaeaea;
-          width: 640px;
+          width: 800px;
          margin: 0 auto;
          padding: 12px;
 -moz-box-shadow: 0px 4px 12px #ccc; /* FF3.5+ */
@@ -80,7 +78,6 @@ footer{
     font-size: 10px;
     text-align: center;
     margin-top: 24px;
-    text-shadow: 0px 2px 0px #fff;
 }
 
 /* Button styles from the awesome: http://www.webdesignerwall.com/demo/css-buttons.html */
@@ -97,7 +94,6 @@ footer{
     text-decoration: none;
     font: 14px/100% Arial, Helvetica, sans-serif;
     padding: .5em 2em .55em;
-    text-shadow: 0 1px 1px rgba(0,0,0,.3);
     -webkit-border-radius: .5em;
     -moz-border-radius: .5em;
     border-radius: .5em;
@@ -298,6 +294,8 @@ article.post p{
 
 article.post img{
     display: block;
+    margin-left: auto;
+    margin-right: auto;
     margin-bottom: 24px;
 }
 
@@ -399,7 +397,6 @@ a.backlink:hover, a.prev:hover, a.next:hover{
 .post_nav a{
     color: #666;
     text-decoration: none;
-    text-shadow: 0px 2px 0px #fff;
 }
 
 .post_nav div{
@@ -427,7 +424,6 @@ a.backlink:hover, a.prev:hover, a.next:hover{
 
 .archives li.post time{
     color: #999;
-    text-shadow: 0px 2px 0px #fff;
     margin-right: 24px;
     display:block;
     float: left;
