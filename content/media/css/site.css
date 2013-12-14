@@ -286,6 +286,21 @@ section.content{
 
 /* Content */
 
+article.post h1 {
+    font-weight: normal;
+    font-size: 28px;
+    color: blue;
+    font-family: Anton, Tahoma, sans-serif;
+    margin-bottom: 10px;
+}
+
+article.post h2 {
+    font-weight: bold;
+    font-size: 18px;
+    font-family: Tahoma, sans-serif;
+    margin-bottom: 6px;
+}
+
 article.post p{
     font-size: 14px;
     line-height: 24px;
@@ -440,17 +455,19 @@ a.backlink:hover, a.prev:hover, a.next:hover{
 }
 
 
-.codebox {
-  margin-top: 8px;
-  margin-bottom: 12px;
-}
-.code {
-  position: relative;
-  -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  background-color: #F0F3F3;
+article.post code {
+    display: block;
+    font-family: monospace;
+    font-size: 14px;
+    background-color: #F0F3F3;
+    padding: 5px 10px;
+    margin-bottom: 20px;
+    position: relative;
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    background-color: #F0F3F3;
 }
 .code figcaption {
   font-size: 10px;
