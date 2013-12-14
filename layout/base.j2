@@ -34,12 +34,12 @@
   <div id="container">
       {% block container %}
       <div id="main" role="main">
-          <header class="banner clearfix">
           {% block header -%}
+          <header class="banner clearfix">
             <h1>Pluto</h1>
             <h3>A hyde website</h3>
-          {%- endblock %}
           </header>
+          {%- endblock %}
           <section class="content">
           {% block main %}
           {% endblock main %}
