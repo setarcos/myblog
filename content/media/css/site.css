@@ -295,7 +295,12 @@ section.content{
 
 /* Content */
 
+article.post {
+    text-indent:30px;
+}
+
 article.post h1 {
+    text-indent:0px;
     font-weight: normal;
     font-size: 24px;
     color: blue;
@@ -304,6 +309,7 @@ article.post h1 {
 }
 
 article.post h2 {
+    text-indent:0px;
     font-weight: bold;
     font-size: 18px;
     font-family: Tahoma, sans-serif;
@@ -332,6 +338,10 @@ article.post table{
     color: #999;
     float:left;
     margin-top: 6px;
+}
+ol li{
+    text-indent: 0px;
+    margin-left: 24px;
 }
 
 ul.tags{
@@ -469,6 +479,7 @@ a.backlink:hover, a.prev:hover, a.next:hover{
 
 
 article.post code {
+    text-indent:0px;
     display: block;
     font-family: monospace;
     font-size: 14px;
