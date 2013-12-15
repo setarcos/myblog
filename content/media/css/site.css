@@ -252,7 +252,7 @@ section.content{
     background-color: #ededed;
     list-style-type: none;
     float: left;
-    width: 352px;
+    width: 312px;
     margin-right: 24px;
     margin-bottom: 24px;
     padding: 12px;
@@ -295,12 +295,7 @@ section.content{
 
 /* Content */
 
-article.post {
-    text-indent:30px;
-}
-
 article.post h1 {
-    text-indent:0px;
     font-weight: normal;
     font-size: 24px;
     color: blue;
@@ -309,7 +304,6 @@ article.post h1 {
 }
 
 article.post h2 {
-    text-indent:0px;
     font-weight: bold;
     font-size: 18px;
     font-family: Tahoma, sans-serif;
@@ -317,6 +311,7 @@ article.post h2 {
 }
 
 article.post p{
+    text-indent:30px;
     font-size: 14px;
     line-height: 24px;
     margin: 6px 0;
@@ -339,8 +334,11 @@ article.post table{
     float:left;
     margin-top: 6px;
 }
+
 ol li{
-    text-indent: 0px;
+    margin-left: 24px;
+}
+ul li{
     margin-left: 24px;
 }
 
