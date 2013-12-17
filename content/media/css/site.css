@@ -56,12 +56,12 @@ th {
 }
 
 a {
-    color: #37e;
+    color: #02B; /* The 3-digit codes are shorthand, #123 is the same as #112233 */
     text-decoration: underline;
 }
 
 a:hover{
-    color: #222;
+    color: #B20;
 }
 
 body{
@@ -89,72 +89,6 @@ footer{
     margin-top: 24px;
 }
 
-/* Button styles from the awesome: http://www.webdesignerwall.com/demo/css-buttons.html */
-
-.button {
-    display: inline-block;
-    zoom: 1; /* zoom and *display = ie7 hack for display:inline-block */
-    *display: inline;
-    vertical-align: baseline;
-    margin: 0 2px;
-    outline: none;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    font: 14px/100% Arial, Helvetica, sans-serif;
-    padding: .5em 2em .55em;
-    -webkit-border-radius: .5em;
-    -moz-border-radius: .5em;
-    border-radius: .5em;
-    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
-    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);
-    box-shadow: 0 1px 2px rgba(0,0,0,.2);
-}
-.button:hover {
-    text-decoration: none;
-}
-.button:active {
-    position: relative;
-    top: 1px;
-}
-
-.bigrounded {
-    -webkit-border-radius: 2em;
-    -moz-border-radius: 2em;
-    border-radius: 2em;
-}
-.medium {
-    font-size: 12px;
-    padding: .4em 1.5em .42em;
-}
-.small {
-    font-size: 11px;
-    padding: .2em 1em .275em;
-}
-
-
-/* white */
-.white {
-    color: #606060;
-    border: solid 1px #b7b7b7;
-    background: #fff;
-    background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ededed));
-    background: -moz-linear-gradient(top,  #fff,  #ededed);
-    filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#ededed');
-}
-.white:hover {
-    background: #ededed;
-    background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#dcdcdc));
-    background: -moz-linear-gradient(top,  #fff,  #dcdcdc);
-    filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#dcdcdc');
-}
-.white:active {
-    color: #999;
-    background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#fff));
-    background: -moz-linear-gradient(top,  #ededed,  #fff);
-    filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#ffffff');
-}
-
 .banner{
     border-bottom: 2px solid #222;
     padding: 0 12px;
@@ -174,39 +108,6 @@ footer{
     font-size: 16px;
     line-height: 24px;
     margin-bottom: 12px;
-}
-
-.banner nav{
-    position: absolute;
-    right: 0;
-    bottom: 0;
-}
-
-.banner nav li{
-    list-style-type: none;
-    float: left;
-}
-
-.banner nav li a.button{
-    margin:0;
-    -webkit-border-bottom-left-radius: 0;
-    -webkit-border-bottom-right-radius: 0;
-    -moz-border-radius-bottomleft: 0;
-    -moz-border-radius-bottomright: 0;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-.banner nav li a.button:hover{
-    color: #000;
-}
-.banner nav li a.button.active{
-    color: #d7d7d7;
-    border: solid 1px #333;
-    background: #333;
-    background: -webkit-gradient(linear, left top, left bottom, from(#666), to(#000));
-    background: -moz-linear-gradient(top,  #666,  #000);
-    filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#666666', endColorstr='#000000');
 }
 
 .blog_excerpt{
@@ -298,7 +199,7 @@ section.content{
 article.post h1 {
     font-weight: normal;
     font-size: 24px;
-    color: blue;
+    color: #0B2;
     font-family: Anton, Tahoma, sans-serif;
     margin-bottom: 10px;
 }
@@ -338,6 +239,10 @@ article.post table{
 ol li{
     margin-left: 24px;
 }
+article.post ol li p{
+    text-indent: 0px;
+}
+
 ul li{
     margin-left: 24px;
 }
@@ -368,7 +273,7 @@ ul.tags li a:after{
 }
 
 ul.tags li a:hover{
-    color: #222;
+    color: #B20;
 }
 
 h1 a, h2 a, h3 a{
@@ -423,15 +328,19 @@ a.next{
 a.next{ float: right };
 
 a.backlink:hover, a.prev:hover, a.next:hover{
-    color: #222;
+    color: #B20;
 }
 
-.post_nav a.disabled{
+.post_nav a.disabled, .post_nav a.disabled:hover{
     color: #ccc;
 }
 
 .post_nav a{
-    color: #666;
+    color: #660;
+    text-decoration: none;
+}
+.post_nav a:hover{
+    color: #B20;
     text-decoration: none;
 }
 
@@ -443,10 +352,7 @@ a.backlink:hover, a.prev:hover, a.next:hover{
     margin-left: 4px;
 }
 
-#facebook_like{
-    margin-top: 1px;
-}
-
+/* blog tags */
 .archives ul.posts{
     margin-top: 24px;
 }
@@ -498,6 +404,7 @@ article.post code {
   right: 12px;
   color: rgba(0, 0, 0, 0.5);
 }
+
 .highlight pre {
   font-size: 12px;
   padding: 16px 12px 12px;
