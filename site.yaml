@@ -59,3 +59,4 @@ markdown:
         - tables
         - fenced_code
         - toc
+        - codehilite
