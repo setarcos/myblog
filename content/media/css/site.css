@@ -196,10 +196,18 @@ section.content{
 
 /* Content */
 
+article.post h1.title {
+    font-weight: normal;
+    font-size: 26px;
+    color: #20B;
+    font-family: Anton, Tahoma, sans-serif;
+    margin-bottom: 10px;
+}
+
 article.post h1 {
     font-weight: normal;
-    font-size: 24px;
-    color: #0B2;
+    font-size: 22px;
+    color: #20B;
     font-family: Anton, Tahoma, sans-serif;
     margin-bottom: 10px;
 }
