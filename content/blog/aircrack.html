@@ -19,6 +19,7 @@ tags:
 
 首先需要下载 aircrack，编译安装不在话下。之后的过程就比较简单了。
 
+    ::console
     # ifconfig wlan0 down
     # airmon-ng start wlan0
 
@@ -30,6 +31,7 @@ tags:
 
 如果要恢复 wifi 上网，还需要执行下面的命令
 
+    ::console
     # ifconfig mon0 down
     # airmon-ng stop wlan0
     # ifconfig wlan0 up
@@ -38,6 +40,7 @@ tags:
 
 USB 接口的监听（sniffer or monitor）在 Linux 操作系统中有很好的支持，只要加载 usbmon 模块（在 Driver/USB 下面）就可以了，不过需要内核支持 DEBUG_FS（CONFIG_DEBUG_FS 在 Kernel Hacking/Compiler options/Debug Filesystem 下面，这个太容易让人误解为对文件系统的调试了）。关于 usbmon 在内核文档中有详细的说明，我们只需要执行下面两步，就可以通过 wireshark 监听了。
 
+    ::console
     # mount -t debugfs none_debugs /sys/kernel/debug
     # modprobe usbmon
 
