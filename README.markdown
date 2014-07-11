@@ -1,1 +1,1 @@
-Basic template for hyde.
+A blog powered by hyde.
