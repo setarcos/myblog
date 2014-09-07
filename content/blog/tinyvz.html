@@ -41,6 +41,10 @@ SOCKS 服务器只能给浏览器使用，最好能实现个 VPN 服务器，第
 
 OpenVPN 的服务已经搭过多次了，家里的路由器就使用 OpenVPN 实现与实验室电脑的共享上网。但在 VPS 中还是出了问题。建立隧道连接没有问题，但通信过程非常不稳定，只是偶尔可以 ping 通远程的服务器，基本属于不可用状态。
 
+而且 iptables 的 MASQUERADE 好像不好使，必须使用 SNAT，例如：
+
+    iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o venet0 -j SNAT --to MYVZIP 
+
 ## 其它 服务
 
 apache 服务安装后就不能启动，说是 ports.conf 中语法错误，但实际的原因是 libapr1 使用了比较新的内核接口，必须重新编译安装 libapr1 猜可以。
