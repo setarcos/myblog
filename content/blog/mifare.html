@@ -11,6 +11,8 @@ tags:
 
 {%- endmark %}
 
+# 入手 ACR122U 读卡器
+
 MIFARE 是 NXP 公司的商标，主要用于利用 NFC 技术通信的低成本ID/IC卡。
 网上找相关标准比较复杂，还是从工程的角度入手。淘宝购入 ACR122U 芯片
 的读卡器，然后用相关软件对卡进行操作来增加对卡的认识。
@@ -21,6 +23,8 @@ MIFARE 是 NXP 公司的商标，主要用于利用 NFC 技术通信的低成本
     NFC: Couldn't poweron the reader (error -11)
 
 以为是内核的问题，更新了 Debian 到最新版之后问题依旧。
+
+# 安装驱动和软件
 
 换个思路，在 ACS 下载了最新的驱动，并安装相关软件：
 
@@ -34,7 +38,10 @@ MIFARE 是 NXP 公司的商标，主要用于利用 NFC 技术通信的低成本
     ::console
     # apt-get install libnfc5 libnfc-bin libnfc-dev
 
-使用 nfc-list 也只能读到ATQA（属性），UID（第一扇区前四个字节）和SAK（？）
+使用 nfc-list 也只能读到ATQA（属性），UID（第一扇区前四个字节）和SAK（？）。
+
+# 暴力破解
+
 还需要下载一个强力的软件 mfoc，通过暴力破解获取数据。下载源码编译之后，运行
 
     ::console
