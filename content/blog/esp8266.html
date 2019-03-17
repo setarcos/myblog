@@ -49,7 +49,34 @@ AirLink按钮，然后在手机端输入 AP 的信息并搜索硬件。大概十
 
 后来把检测是否有相关命令的 hasBeenSet 调用去掉，直接用 read 读取相应的值，
 结果就正常了。顺便说一下机智云自带的调试 APP 和下载参考代码生成的 APP
-都可以用，功能类似。
+都可以用，功能类似。(3月17日更新：这个部分后来发现还是我自己的代码问题)
+
+# 写入 AT 固件
+
+后来想在 ESP8266 模块中写入 AT 固件，自己控制 WIFI 接入，但确多次无法成功。
+网上下载的不同固件都无法正常启动，在 minicom 中只能看到乱码。后来看资料
+指导启动信息的波特率是 74880，minicom 和 screen 都不支持，最后还是 esptool
+中带的 miniterm.py 支持。
+
+看到的错误原因是 csum err，但 verify_image 也没有问题，不知道原因是什么。
+网上看到有人说用 dout 方式写入就没有问题了，可用 win 下面的官方写入软件
+根本就写不进去，最后下载开源的 esptool 就可以用 dout 方式写入了，结果看到
+错误信息不一样了，变成
+
+    ::consle
+    2nd boot version : 1.7(5d6f877)
+    SPI Speed : 40MHz
+    SPI Mode : DOUT
+    SPI Flash Size & Map: 32Mbit(512KB+512KB)
+    jump to run user1 @ 1000
+
+    mismatch map 5,spi_size_map 4
+    system_partition_table_regist fail
+
+还是看网上的信息，说 1.7 的固件会有这个问题，但 1.6.2 的就没有问题了。
+真是历尽千辛万苦终于获得了 ready 提示信息。
+
+虽然记录的过程看来很简单，但实际经过的尝试复杂的多。
 
 # 总结
 
