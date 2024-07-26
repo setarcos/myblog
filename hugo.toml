@@ -1,0 +1,10 @@
+baseURL = 'https://example.org/'
+languageCode = 'zh-cn'
+title = 'Pluto 的零散记录'
+theme = 'hugo-flex'
+enableInlineShortcodes = true
+
+[params]
+  description = "不定期记录一些个人收获"
+  footer = "Copyright © 2012–2024, Yanjun Yang(Pluto), all rights reserved."
+  noClasses = true

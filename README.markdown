@@ -1,1 +1,1 @@
-A blog powered by hyde.
+A blog powered by hugo.
