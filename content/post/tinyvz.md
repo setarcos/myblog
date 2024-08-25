@@ -21,7 +21,9 @@ tags:
 
 ## ssh 服务
 
-    # apt-get install openssh-server
+```bash
+# apt-get install openssh-server
+```
 
 使用 ssh 服务不但可以直接登录到 VPS 中，而不需要通过 vz:vz 那个服务器的中转，还可以实现端口的动态转发，搭建一个 SOCKS 服务器。
 
@@ -29,8 +31,10 @@ tags:
 
 SOCKS 服务器只能给浏览器使用，最好能实现个 VPN 服务器，第一个实现方案是用 PPTPD 服务。安装和配置过程还比较简单，只要安装 pptpd 和 iptables，并修改 ppp 的几个配置文件就可以了。具体的设置方法网上有很多，但安装完毕却一直出现如下错误：
 
-    GRE: read(...) from PTY failed...
-    CTRL: PTY read or GRE write failed (pty,gre)=(6,7)
+```bash
+GRE: read(...) from PTY failed...
+CTRL: PTY read or GRE write failed (pty,gre)=(6,7)
+```
 
 我在自己的主机上配置 PPTPD 竟然也出现同样的错误，有人说是 GRE 穿透路由的问题，也许是目前的网络环境不允许 GRE 包通过。这个有时间再慢慢检查一下。
 
@@ -40,15 +44,19 @@ OpenVPN 的服务已经搭过多次了，家里的路由器就使用 OpenVPN 实
 
 而且 iptables 的 MASQUERADE 好像不好使，必须使用 SNAT，例如：
 
-    iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o venet0 -j SNAT --to MYVZIP 
+```bash
+iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o venet0 -j SNAT --to MYVZIP 
+```
 
 ## 其它 服务
 
 apache 服务安装后就不能启动，说是 ports.conf 中语法错误，但实际的原因是 libapr1 使用了比较新的内核接口，必须重新编译安装 libapr1 才可以。
 
-    # apt-get source libapr1
-    # cd apr-1.4.6/
-    # dpkg-buildpackage
+```bash
+# apt-get source libapr1
+# cd apr-1.4.6/
+# dpkg-buildpackage
+```
 
 编译失败在最后的 test 部分，不理它，直接进入到 build-i386 目录然后 make install 安装成功，然后就可以启动 apache 了。
 

@@ -25,7 +25,9 @@ tags:
 用它转换文件格式非常容易，不用配置脚本也没有复杂的开关选项。对于转换 latex
 到 docx 只要如下的命令：
 
-    $ pandoc -f latex -t docx source.tex -o output.docx
+```bash
+$ pandoc -f latex -t docx source.tex -o output.docx
+```
 
 不用解释就可以了解这个命令的使用方法，而且给我的第一感觉就是非常的快，甚至
 比使用 latex 生成 pdf 文件的速度还快。唯一发现的问题是表格支持不太好，但表格
@@ -52,11 +54,15 @@ tags:
 
 我开始以为参考文献是不被支持的，结果一个简单的过滤器就可以解决一半问题。
 
-    $ sudo apt-get install pandoc-citeproc
-    $ pandoc -f latex -t docx source.tex --bibliography=mybib.bibtex -o output.docx
+```bash
+$ sudo apt-get install pandoc-citeproc
+$ pandoc -f latex -t docx source.tex --bibliography=mybib.bibtex -o output.docx
+```
 
 这样是可以生成参考文献，但是格式不符合要求。经过网络搜索才知道还需要一个
 格式描述文件（citation style language）[ieee.csl](https://github.com/citation-style-language/styles/blob/master/ieee.csl)。下载这个文件之后用如下命令就可以
 搞定参考文献了。
 
-    $ pandoc -f latex -t docx source.tex --bibliography=mybib.bibtex --csl=ieee.csl -o output.docx
+```bash
+$ pandoc -f latex -t docx source.tex --bibliography=mybib.bibtex --csl=ieee.csl -o output.docx
+```

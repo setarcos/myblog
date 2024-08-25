@@ -32,22 +32,28 @@ Gentoo 也不是新朋友了，使用 Debian 之前的主力发行版，两年�
 
 代码如下：
 
-    $ hp-plugin
-    $ sudo hp-setup
+```bash
+$ hp-plugin
+$ sudo hp-setup
+```
 
 * vsftpd 安装后也不好用，最后增加了一个 `seccomp_sandbox=NO` 选项搞定。
 * pip 直接安装的 hyde 也不能用，必须用 python2 版本的
 
 可以使用 python2 指定用的 python 版本
 
-    # python2 -m pip install hyde
+```bash
+# python2 -m pip install hyde
+```
 
 * Qt5 的程序无法输入中文。这个问题以前我没有注意过，估计是发行版自己给修复了。
 
 具体需要安装输入法模块的 Qt5 包，然后设置环境变量
 
-    # emerge --ask fcitx-qt5
-    $ export QT_IM_MODULE=fcitx
+```bash
+# emerge --ask fcitx-qt5
+$ export QT_IM_MODULE=fcitx
+```
 
 # 收获
 

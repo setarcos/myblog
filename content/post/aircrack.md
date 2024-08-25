@@ -17,8 +17,10 @@ tags:
 
 首先需要下载 aircrack，编译安装不在话下。之后的过程就比较简单了。
 
-    # ifconfig wlan0 down
-    # airmon-ng start wlan0
+```bash
+# ifconfig wlan0 down
+# airmon-ng start wlan0
+```
 
 此时会多了一个 mon0 网络接口，启动 wireshark 监听这个接口就可以看到 802.11 协议的内容了。
 
@@ -28,16 +30,20 @@ tags:
 
 如果要恢复 wifi 上网，还需要执行下面的命令
 
-    # ifconfig mon0 down
-    # airmon-ng stop wlan0
-    # ifconfig wlan0 up
+```bash
+# ifconfig mon0 down
+# airmon-ng stop wlan0
+# ifconfig wlan0 up
+```
 
 # 监听 USB 接口
 
 USB 接口的监听（sniffer or monitor）在 Linux 操作系统中有很好的支持，只要加载 usbmon 模块（在 Driver/USB 下面）就可以了，不过需要内核支持 DEBUG_FS（CONFIG_DEBUG_FS 在 Kernel Hacking/Compiler options/Debug Filesystem 下面，这个太容易让人误解为对文件系统的调试了）。关于 usbmon 在内核文档中有详细的说明，我们只需要执行下面两步，就可以通过 wireshark 监听了。
 
-    # mount -t debugfs none_debugs /sys/kernel/debug
-    # modprobe usbmon
+```bash
+# mount -t debugfs none_debugs /sys/kernel/debug
+# modprobe usbmon
+```
 
 通过 lsusb 命令可以知道要监听的设备在哪条 USB 总线上，然后在 wireshark 中的接口列表中选择相应的总线即可。
 

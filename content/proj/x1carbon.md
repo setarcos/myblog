@@ -17,13 +17,15 @@ tags:
 
 硬盘的分区结构为：
 
-    # partx -l /dev/sda
-    1:      2048-  2050047 (  2048000 sectors,   1048 MB)
-    2:   2050048-  2582527 (   532480 sectors,    272 MB)
-    3:   2582528- 22114303 ( 19531776 sectors,  10000 MB)
-    4:  22114304-315166719 (293052416 sectors, 150042 MB)
-    5: 315166720-336971775 ( 21805056 sectors,  11164 MB)
-    6: 336971776-351651839 ( 14680064 sectors,   7516 MB)
+```text
+# partx -l /dev/sda
+1:      2048-  2050047 (  2048000 sectors,   1048 MB)
+2:   2050048-  2582527 (   532480 sectors,    272 MB)
+3:   2582528- 22114303 ( 19531776 sectors,  10000 MB)
+4:  22114304-315166719 (293052416 sectors, 150042 MB)
+5: 315166720-336971775 ( 21805056 sectors,  11164 MB)
+6: 336971776-351651839 ( 14680064 sectors,   7516 MB)
+```
 
 其中第 5 分区是用来恢复系统的，第 6 个分区是用来实现 Intel Rapid Start，可以在 BIOS 级别实现休眠的快速恢复。
 
@@ -35,7 +37,9 @@ tags:
 
 增加了 /etc/modprobe.d/i915.conf 调整节能参数，参考了 archwiki 
 
-    options i915 i915_enable_rc6=7 i915_enable_fbc=1 lvds_downclock=1
+```text
+options i915 i915_enable_rc6=7 i915_enable_fbc=1 lvds_downclock=1
+```
 
 ## laptop_mode 
 
@@ -55,8 +59,10 @@ tags:
 
 前者是一个内核模块，可以用它直接调用 acpi 函数。tpacpi-bat 则是一个脚本，可以用来达到设置电池阈值的目的。最简单的用法如下：
 
-    tpacpi-bat -s ST 0 40
-    tpacpi-bat -s SP 0 80
+```text
+tpacpi-bat -s ST 0 40
+tpacpi-bat -s SP 0 80
+```
 
 分别设置了开始充电的阈值为 40% 和结束充电的阈值 80%。
 
@@ -73,7 +79,9 @@ CONFIG_FB_SIMPLE 如果不设置的话，最开始的启动信息看不到，不
 
 运行下面命令
 
-    # efibootmgr -p 2 -c -g -L "Debian (EFI stub)" -l '\EFI\linux\vmlinuz' -u root=UUID=$UUID ro quiet rootfstype=ext4 add_efi_memmap initrd=\\EFI\\linux\\initrd.img
+```bash
+# efibootmgr -p 2 -c -g -L "Debian (EFI stub)" -l '\EFI\linux\vmlinuz' -u root=UUID=$UUID ro quiet rootfstype=ext4 add_efi_memmap initrd=\\EFI\\linux\\initrd.img
+```
 
 其中 -p 2 参数是由于我的 EFI 分区在 sda2
 
@@ -85,11 +93,13 @@ CONFIG_FB_SIMPLE 如果不设置的话，最开始的启动信息看不到，不
 
 xterm 的中文支持不是“与生俱来”的，经过了一番配置，终于有了比较好的效果。具体使用的 uxterm 来启动， 通过 .Xresources 来进行配置： 
 
-    UXTerm*faceName: Bitstream
-    UXTerm*faceNameDoublesize: WenQuanYi Bitmap Song
-    UXTerm*faceSize: 10
-    UXTerm*metaSendsEscape: true
-    UXTerm*scrollbar: yes
+```text
+UXTerm*faceName: Bitstream
+UXTerm*faceNameDoublesize: WenQuanYi Bitmap Song
+UXTerm*faceSize: 10
+UXTerm*metaSendsEscape: true
+UXTerm*scrollbar: yes
+```
 
 其中那个 metaSendsEscape 用来保证我习惯的 readline 功能可以使用，否则 alt+. 都不好使了。
 
@@ -126,6 +136,8 @@ fluxbox 启动速度快，配置灵活，界面也比较美观，在笔记本上
 
 因此还使用一个快捷键来切换 touchpad 的有效：
 
-    OnDesktop Mouse6 :Exec synclient TouchpadOff=1
+```text
+OnDesktop Mouse6 :Exec synclient TouchpadOff=1
+```
 
 这个设置在 keys 中，由 Mouse6 触发：设置为双指向右滑动。

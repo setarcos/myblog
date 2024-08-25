@@ -28,8 +28,10 @@ SmartScreen 把应用拦截了，由于网络还没有配置所以迟迟给不�
 卸载之后应该就没有问题了。网上资料显示，如果要防止自动安装，
 可以增加如下注册表项：
 
-    [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent]
-    "DisableWindowsConsumerFeatures"=dword:00000001
+```text
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent]
+"DisableWindowsConsumerFeatures"=dword:00000001
+```
 
 # 使用 UTC 时间
 
@@ -37,8 +39,10 @@ SmartScreen 把应用拦截了，由于网络还没有配置所以迟迟给不�
 体验的一个麻烦。最好的办法还是让 Windows 使用 UTC 时间，也是要
 修改注册表：
 
-    [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation]
-    "RealTimeIsUniversal"=qword:00000001
+```text
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation]
+"RealTimeIsUniversal"=qword:00000001
+```
 
 # 关于杀毒软件
 
@@ -46,4 +50,3 @@ SmartScreen 把应用拦截了，由于网络还没有配置所以迟迟给不�
 就不需要安装杀毒软件了。但这里我持保留态度，主要对微软不是很信任，
 因此还是安装了 ESET，希望更专业一些。安装了 ESET 后 WindowsDefender
 的杀毒功能就自动关闭了，应该也不会影响性能。
-

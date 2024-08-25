@@ -30,4 +30,6 @@ Linux 对 Helix 的硬件支持一直是我的痛，但经过了几个月的折�
 
 声卡的支持是足足花了四个多月才最终搞定，一直都是内核不支持，只有 hdmi 的输出。后来在升级内核的时候忽然发现多了个声卡设备 `broadwell-rt286`，但配置了好久也是无法发生。今天（2015-09-30）决定和它死磕，通过 `aplay` 命令选择第二个声卡来播放，然后不断的用 alsamixer 设置不同的通道开关组合，结果终于听到了声音。然后就是找到 PulseAudio 设置缺省声卡的方法，在 `/etc/pulse/default.pa` 里增加了 `set-default-sink 1` 搞定。只是音量略低，不过好像 Windows 下也是如此就没有多理了。差点忘记一点，dmesg 命令曾经提示缺少一个固件，最后从 Windows 版的驱动里面拷贝了 `IntcPP01.bin` 过去搞定。选择声卡的方法也试了半天，最后用的是：
 
-    $ aplay Ring05.wav -D sysdefault:CARD=broadwellrt286
+```bash
+$ aplay Ring05.wav -D sysdefault:CARD=broadwellrt286
+```

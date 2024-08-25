@@ -13,7 +13,9 @@ tags:
 
 在淘宝上购买了包含 4.3 寸 LCD 的 BeagleBone Black（以后称作 BBB）开发板，到手后直接上电，发现板子运行的是 Debian 系统，而且运行了 avahi 服务，可以直接使用下面的命令登录，其中 root 的密码是空，同时板子的网口也必须接好网线。
 
-    $ ssh root@beaglebone.local
+```bash
+$ ssh root@beaglebone.local
+```
 
 接上 USB Client 接口之后会识别出一个 U 盘和一个串口，通过 U 盘可以非常方便的和开发板交换文件。
 
@@ -35,7 +37,9 @@ BBB 板的启动过程是首先内部的 ROM 执行，然后会根据 Boot 管�
 
 首先下载了 `buildroot-2014.05` 的稳定版，里面就有对 beaglebone 的支持，因此只要执行：
 
-    $ make beaglebone_defconfig
+```bash
+$ make beaglebone_defconfig
+```
 
 就可以获得一个基本的配置，只要在这个基础上修改就可以了。
 
@@ -50,22 +54,23 @@ BBB 板的启动过程是首先内部的 ROM 执行，然后会根据 Boot 管�
 
 还缺少的是 uEnv.txt 文件，这个是 U-Boot 的配置文件，里面可以写入 U-Boot 的配置信息，这个配置文件所涉及到的命令不是很熟悉，最后好不容易修改好后的样子是这样的：
 
-    console=ttyO0,115200n8
+```text
+console=ttyO0,115200n8
 
-    kernel_file=zImage
+kernel_file=zImage
 
-    loadaddr=0x82000000
-    fdtaddr=0x88000000
-    fdt_high=0xffffffff
+loadaddr=0x82000000
+fdtaddr=0x88000000
+fdt_high=0xffffffff
 
-    loadkernel=load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${kernel_file}
-    loadfdt=load mmc ${mmcdev}:${mmcpart} ${fdtaddr} /dtbs/${fdtfile}
+loadkernel=load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${kernel_file}
+loadfdt=load mmc ${mmcdev}:${mmcpart} ${fdtaddr} /dtbs/${fdtfile}
 
+loadfiles=run loadkernel; run loadfdt
+mmcargs=setenv bootargs console=tty0 console=${console} ${optargs}\
+${kms_force_mode} root=${mmcroot} rootfstype=${mmcrootfstype} noinitrd
 
-    loadfiles=run loadkernel; run loadfdt
-    mmcargs=setenv bootargs console=tty0 console=${console} ${optargs}\
-    ${kms_force_mode} root=${mmcroot} rootfstype=${mmcrootfstype} noinitrd
-
-    uenvcmd=run loadfiles; run mmcargs; bootz ${loadaddr} - ${fdtaddr}
+uenvcmd=run loadfiles; run mmcargs; bootz ${loadaddr} - ${fdtaddr}
+```
 
 主要是根据 Debian 发行版带的 uEnv.txt 修改，去掉 initrd 部分得到的。

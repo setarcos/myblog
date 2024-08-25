@@ -33,17 +33,21 @@ FDAPM 的问题在我第一篇 FreeDOS 的文章中提过，调用参数改成 A
 
 比较简单的是做一个软盘镜像
 
-    $ dd if=/dev/zero of=btdos.img bs=512 count=2880
-    $ /sbin/mkfs.msdos -F 12 -n "FREEDOS" btdos.img
+```bash
+$ dd if=/dev/zero of=btdos.img bs=512 count=2880
+$ /sbin/mkfs.msdos -F 12 -n "FREEDOS" btdos.img
+```
 
 然后启动 qemu 的 FreeDOS 把需要的文件拷贝进去。
 
 如果要通过 Grub2 启动，还必须在 grub.cfg 中加入
 
-    menuentry "DOS" {
-        linux16 /boot/memdisk
-        initrd16 /boot/btdos.img
-    }
+```text
+menuentry "DOS" {
+    linux16 /boot/memdisk
+    initrd16 /boot/btdos.img
+}
+```
 
 其中的 memdisk 是 syslinux 软件中所带，也要拷贝到 boot 目录下。
 
@@ -51,8 +55,9 @@ FDAPM 的问题在我第一篇 FreeDOS 的文章中提过，调用参数改成 A
 
 在 qemu 中测试通过的 iso 映像在实际硬件上竟然无法识别虚拟的光驱，最后通过 syslinux 中自带的驱动正常识别，顺便加上了光盘的 CACHE。AUTOEXEC 中的增加的代码如下：
 
-    DEVLOAD /H /Q %dosdir%\BIN\ELTORITO.SYS /D:CDROM001
-    DEVLOAD /H /Q %dosdir%\BIN\CDRCACHE.SYS CDROM001 CDRCACH$ 1024
-    SHSUCDX /Q /D:CDRCACH$
-
+```bat
+DEVLOAD /H /Q %dosdir%\BIN\ELTORITO.SYS /D:CDROM001
+DEVLOAD /H /Q %dosdir%\BIN\CDRCACHE.SYS CDROM001 CDRCACH$ 1024
+SHSUCDX /Q /D:CDRCACH$
+```
 

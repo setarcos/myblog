@@ -11,8 +11,10 @@ tags:
 
 网上找到的资料都比较老，用起来经常达不到必要的效果。首先是要确定主机的蓝牙模块正常。
 
-    $ hcitool dev
-    Devices:
+```bash
+$ hcitool dev
+Devices:
+```
 
 如果 Devices 下面的列表是空的，就表明无法识别主机设备，说明内核驱动没有正确加载。编译内核的时候花了好长时间找 bluetooth 相关选项，很意外发现竟然在 Networking 条目下，对应的驱动模块是 btusb。
 
@@ -25,9 +27,10 @@ tags:
 
 需要做的只是：
 
-    bluez-simple-agent hci0 xx:xx:xx:xx:xx:xx
-    bluez-test-device trusted xx:xx:xx:xx:xx:xx yes
-    bluez-test-input connect xx:xx:xx:xx:xx:xx
+```text
+bluez-simple-agent hci0 xx:xx:xx:xx:xx:xx
+bluez-test-device trusted xx:xx:xx:xx:xx:xx yes
+bluez-test-input connect xx:xx:xx:xx:xx:xx
+```
 
 如果第一步出错：`org.bluez.Error.AlreadyExists: Already Exists` 只要在第一条命令后面加上 `remove` 然后重新执行就可以了。这样设置好之后，重启依然有效，键盘可以自动连接。
-

@@ -19,11 +19,15 @@ tags:
 
 首先把有问题的 object file 删掉，然后执行 `git-fsck --full`，按照文档，这里应该会提示一个 broken link from ... 的信息，这样就找到了链接到丢失文件的目标，然后通过 git ls-tree 找到坏掉文件所对应的源码。可我这里没有 broken link from 的信息，所以我通过另外的命令：
 
-    $ git log --raw --all
+```bash
+$ git log --raw --all
+```
 
 从输出信息中找到对应丢失的目标文件，也就可以知道对应的源文件是什么了。我的情况比较简单，对应的源文件正好是最新的版本——也许这也是没有 broken link 消息的原因——之后就通过下面的命令恢复了丢失的目标文件
 
-    $ git hash-object -w my-magic-file
+```bash
+$ git hash-object -w my-magic-file
+```
 
 # 后记
 

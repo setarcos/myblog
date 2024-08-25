@@ -14,7 +14,9 @@ Kindle 提供了一个 Java 的编程接口，有点类似于网页的 Applet，
 
 Kindlet 的主要类库是 KDK，可以从 Kindle 里面直接拷贝出来，位置是
 
-    /opt/amazon/ebook/lib/Kindlet-1.2.jar
+```bash
+$ /opt/amazon/ebook/lib/Kindlet-1.2.jar
+```
 
 编写一个 Main.java
 
@@ -27,51 +29,59 @@ import com.amazon.kindle.kindlet.ui.KTextArea;
 
 public class Main  extends AbstractKindlet {
 
-        private KindletContext ctx;
+    private KindletContext ctx;
 
-        public void create(KindletContext context) {
-                this.ctx = context;
-        }
+    public void create(KindletContext context) {
+            this.ctx = context;
+    }
 
-        public void start() {
-                try {
-                        ctx.getRootContainer().add(new KTextArea("Hello World!"));
-                } catch (Throwable t) {
-                        t.printStackTrace();
-                }
-        }
+    public void start() {
+            try {
+                    ctx.getRootContainer().add(new KTextArea("Hello World!"));
+            } catch (Throwable t) {
+                    t.printStackTrace();
+            }
+    }
 }
 ```
 
 设置 CLASSPATH 包含 KDK，然后就可以直接用 javac 编译代码，但这里要
 指定 java 的版本：
 
-    $ javac -target 1.4 -source 1.4 Main.java
+```bash
+$ javac -target 1.4 -source 1.4 Main.java
+```
 
 再写一个 MANIFEST.MF 文件，注意 `Main-Class` 的部分
 
-    Manifest-Version: 1.0
-    Main-Class: test.Main
-    Implementation-Title: Hello
-    Implementation-Version: 0.1
-    Implementation-Vendor: Setarcos
-    SDK-Specification-Version: 1.0
-    SDK-Extension-Name: com.amazon.kindle.kindlet
-    Toolbar-Mode: persistent
-    Font-Size-Mode: point
+```text
+Manifest-Version: 1.0
+Main-Class: test.Main
+Implementation-Title: Hello
+Implementation-Version: 0.1
+Implementation-Vendor: Setarcos
+SDK-Specification-Version: 1.0
+SDK-Extension-Name: com.amazon.kindle.kindlet
+Toolbar-Mode: persistent
+Font-Size-Mode: point
+```
 
 使用 jar 命令打包（Main.class 放到 test 目录，因为包名称是 test）：
 
-    $ jar cvmf MANIFEST.MF hello.jar test
+```bash
+$ jar cvmf MANIFEST.MF hello.jar test
+```
 
 最后用 jarsigner 打包：
 
-    $ jarsigner -sigalg SHA1withDSA -keystore developer.keystore -storepass \
-    password hello.jar dktest
-    $ jarsigner -sigalg SHA1withDSA -keystore developer.keystore -storepass \
-    password hello.jar ditest
-    $ jarsigner -sigalg SHA1withDSA -keystore developer.keystore -storepass \
-    password hello.jar dntest
+```bash
+$ jarsigner -sigalg SHA1withDSA -keystore developer.keystore -storepass \
+password hello.jar dktest
+$ jarsigner -sigalg SHA1withDSA -keystore developer.keystore -storepass \
+password hello.jar ditest
+$ jarsigner -sigalg SHA1withDSA -keystore developer.keystore -storepass \
+password hello.jar dntest
+```
 
 将 `hello.jar` 改名为 `hello.azw2` 拷贝到 `documents` 目录就可以了。
 
@@ -91,12 +101,16 @@ public class Main  extends AbstractKindlet {
 一起。但其实最方便的还是用 test 用户来签名，将来把程序拷贝给别人也可以用。
 签名文件保存在系统的如下目录：
 
-    /var/local/java/keystore/developer.keystore
+```bash
+/var/local/java/keystore/developer.keystore
+```
 
 如果要融合签名信息，也可以使用 keytool 命令：
 
-    $ keytool -importkeystore -srckeystore developer-to-import.keystore\
-    -destkeystore developer.keystore
+```bash
+$ keytool -importkeystore -srckeystore developer-to-import.keystore\
+-destkeystore developer.keystore
+```
 
 系统签名文件的密码是 `password`，三个签名的别名前缀 `dk`，`di`，`dn`
 分别代表 `kindle`，`interacitve`，`network` 三个权限，一般用三个签名
@@ -104,4 +118,3 @@ public class Main  extends AbstractKindlet {
 
 开始的时候我的签名总不好使，对比了 KUAL 签名后的 MANIFEST 之后发现它是
 用 SHA1 算法，因此加上 -sigalg 再签名就 OK 了。
-

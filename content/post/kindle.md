@@ -29,9 +29,11 @@ tags:
 usb 网络还是需要一些周折。需要在主屏上按 `DEL` 键进入搜索模式，再
 输入如下三个命令：
 
-    ;debugOn
-    ~usbNetwork
-    ;debugOff
+```text
+;debugOn
+~usbNetwork
+;debugOff
+```
 
 此时接入 USB 线的时候就会识别为网卡，设置网卡地址为 `192.168.2.1`
 就可以用 ssh 访问地址为 `192.168.2.2` 的 kindle 了。

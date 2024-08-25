@@ -16,4 +16,3 @@ tags:
 今天偶然的机会发现只要不加载任何驱动程序，TC 的运行就正常（奇怪当初没有尝试），看了一下 autoexec.bat，觉得加载的 FDAPM 有些不顺眼，就立刻将其注释掉，没想到问题就解决了，看来是 Turbo C 和 FDAPM 的冲突，不过要怎么解决呢？
 
 后来在 freedos 的 maillist 上面询问了一下，Eric Auer 建议调用 FDAPM 的时候使用ADV:REG 参数，这样可以保证 FDAPM 不会过分的将 CPU 置于 IDLE 模式，对普通应用程序的影响就最小。这个改变的确解决了前面遇到的问题。
-

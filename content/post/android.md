@@ -15,14 +15,18 @@ Google 现在好像不太支持命令行工具了，android 命令即将废弃�
 只安装了 SDK 之后其实离开始工作还有很大距离。运行 `sdkmanager --list`
 可以看到能安装的组件，然后就可以用 `sdkmanager` 安装，例如
 
-    $ sdkmanager "emulator;platform-tools"
+```bash
+$ sdkmanager "emulator;platform-tools"
+```
 
 # 建立虚拟机
 
 建立虚拟机可以用 avdmanager 命令，例如：
 
-    $ ./avdmanager create avd -n test2 -k "system-images;\
-    android-25;google_apis;arm64-v8a" -d "Galaxy Nexus"
+```bash
+$ ./avdmanager create avd -n test2 -k "system-images;\
+android-25;google_apis;arm64-v8a" -d "Galaxy Nexus"
+```
 
 其中 `-d --device` 参数在手册里面都没有提，在执行 `create avd`
 命令的时候可以看到相关的提示。而可选的设备列表在 `lib/devices.xml`
@@ -30,11 +34,15 @@ Google 现在好像不太支持命令行工具了，android 命令即将废弃�
 
 # 启动虚拟机
 
-    $ ./emulator -avd test2
+```bash
+$ ./emulator -avd test2
+```
 
 这个命令在执行的时候有可能报告 libGL 的加载失败，可以在运行前指定：
 
-    $ export ANDROID_EMULATOR_USE_SYSTEM_LIBS=1
+```bash
+$ export ANDROID_EMULATOR_USE_SYSTEM_LIBS=1
+```
 
 # 建立新工程
 

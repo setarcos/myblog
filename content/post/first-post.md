@@ -13,7 +13,9 @@ tags:
 
 安装 hyde 还是比较容易的，首先安装 pip，好像大部分 python 用户都喜欢用这个安装工具：
 
-    # apt-get install python-pip
+```bash
+# apt-get install python-pip
+```
 
 之后安装 hyde 就比较简单了，直接 `$ pip install hyde` 就可以，而且也会自动解决依赖关系。
 
@@ -21,7 +23,9 @@ tags:
 
 建立一个新的项目可以直接用下面的命令：
 
-    $ hyde -s myhyde create
+```bash
+$ hyde -s myhyde create
+```
 
 这会使用缺省的 layout 布局页面，myhyde 就是项目的目录，里面的内容就已经是一个完整的网站源码了，之后只要在 myhyde 目录执行 `$ hyde serve` 就可以在 *localhost:8080* 上看到网站的效果了。
 
