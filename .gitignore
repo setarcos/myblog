@@ -1,3 +1,2 @@
-deploy
-content/blog/tags
-.hyde*
+public
+.hugo*
