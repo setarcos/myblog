@@ -19,7 +19,7 @@ Arch 的安装过程按照官网上的步骤也没有问题，但有几个地方
 
 1. 安装的 fluxbox 无法设定缩放壁纸，必须安装 feh
 2. gnome-terminal 启动失败，显示 `Error constructing proxy for org.gnome.Terminal`，原来还必须设置 locale.conf 用：`localectl set-locale LANG="en_US.UTF-8"`
-3. 很多软件不是缺省安装，费了周折的同时也学了很多八百年永不到的命令
+3. 很多软件不是缺省安装，费了周折的同时也学了很多八百年用不到的命令
 4. 电磁触摸屏 Wacom digitizer 好不容易配置可以使用了，但定位却不太准，在 .xprofile 里面加上 `xsetwacom` 的参数设置触摸屏的区域搞定
 
 # 硬件支持
