@@ -53,8 +53,8 @@ tags:
 这里定义了我如果使用 `JetBrains Mono` 字体的时候，如果遇到不能显示的字形，就要使用
 `Noto Color Emoji` 字体来显示。设置之后重启 alacritty 就可以正确显示之前缺失的字形了。
 
-# 存在的疑问
+# 存在的问题
 
-`Noto Color Emoji` 是我为了这次调整新安装的字体，不知道有什么办法可以知道 ghostty
-使用的什么字体。
-
+* `Noto Color Emoji` 是我为了这次调整新安装的字体，不知道有什么办法可以知道 ghostty
+使用的什么字体，ghostty 甚至不依赖系统的字体设置。
+* alacritty 对字体的 ligature 没有支持，ghostty 支持的就很好。
