@@ -2,7 +2,8 @@
 title: Using Kickstart.NeoVIM
 date: '2025-03-06 2:18:52'
 tags:
-    - software, vim
+    - software
+    - vim
 ---
 
 一直不是 LSP（Language Server Protocol）的粉丝，总觉得配置比较麻烦，但最近
