@@ -31,7 +31,7 @@ kickstart.nvim 是一个单文件的 Neovim 配置文件，包含大量注释和
 
 一个对新手很有帮助的插件是 which-key.nvim，可以通过浮动窗口提示可用的命令按键。
 比如在命令状态下按下 g 键，它就会提示你后续可以按的按键，下面代码是部分提示内容：
-```
+```text
 d -> LSP: [G]to [D]efinition
 D -> LSP: [G]to [D]eclaration
 I -> LSP: [G]to [I]mplementation
