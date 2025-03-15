@@ -44,11 +44,7 @@ exec firejail /bin/bash
 我写的脚本必须要处理这种情况。因此修改起来也比较简单，最后的脚本如下：
 ```bash
 #!/bin/bash
-if [[ $# -gt 0 ]]; then
-        exec firejail /bin/bash "$@"
-else
-        exec firejail /bin/bash
-fi
+exec firejail /bin/bash "$@"
 ```
 
 # 支持使用其它 shell
