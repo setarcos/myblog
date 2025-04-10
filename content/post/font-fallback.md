@@ -32,7 +32,7 @@ tags:
     <prefer>
       <family>JetBrains Mono</family>
       <family>Noto Color Emoji</family>
-     </prefer>
+    </prefer>
   </alias>
     <alias>
     <family>JetBrains Mono Bold</family>
@@ -44,7 +44,7 @@ tags:
     <alias>
     <family>JetBrains Mono Italic</family>
     <prefer>
-       <family>JetBrains Mono Italic</family>
+      <family>JetBrains Mono Italic</family>
       <family>Noto Color Emoji</family>
     </prefer>
   </alias>
