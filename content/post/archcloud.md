@@ -100,6 +100,15 @@ menuentry 'Void Linux' {
 1. 双系统使用不同的 ssh key 会让客户端很麻烦，因此将 arch 系统中的 key 复制到 void 系统中。
 1. void 更新了内核之后需要更新 grub 的配置。
 
+```bash
+# mount /dev/sda3 /mnt
+# vi /mnt/boot/grub.cfg
+```
+注意这里的 boot 目录不在根目录的子卷内，否则 grub 支持有问题。
+
+另外 void 缺省使用隐私扩展的 IPV6 地址，这在 OpenStack 里面无法被路由，因此需要修改 `dhcpcd.conf`
+设置 `slaac hwaddr`。
+
 # 使用
 
 在 arch 系统中，可以使用
