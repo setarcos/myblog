@@ -122,7 +122,7 @@ sudo grub-reboot 'Void Linux'
 然后用 `grub-editenv` 修改 arch 的启动设置。
 
 ```bash
-pluto@void ~ > sudo mount /dev/sda3 -o subvol=@archroot /mnt
+pluto@void ~ > sudo mount /dev/sda3 /mnt
 pluto@void /mnt/boot/grub > grub-editenv grubenv set next_entry='Arch Linux'
 ```
 
