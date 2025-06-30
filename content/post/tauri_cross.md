@@ -32,12 +32,12 @@ Linux 平台应该也需要一些依赖，官网只提到了 `llvm`，`lld`，�
 机会用 Docker 查看一下完整的依赖。
 
 还要安装 NSIS 作为安装包构建工具，这个比较麻烦，官网的做法在我电脑上行不通，我主要采用
-源码编译的方式：
+源码编译的方式（void 发行版没有打包 nsis）：
 
 ```bash
 $ wget https://prdownloads.sourceforge.net/nsis/nsis-3.08-src.tar.bz2
-$ tar xfv nsis-3.08-sre.tar.bz2
-$ cd nsis-3.08
+$ tar xfv nsis-3.08-src.tar.bz2
+$ cd nsis-3.08-src
 $ scons makensis SKIPPLUGINS=all SKIPUTILS=all
 $ sudo cp build/urelease/makensis/makensis /usr/local/bin
 ```
