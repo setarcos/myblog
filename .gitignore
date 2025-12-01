@@ -1,2 +1,5 @@
 public
 .hugo*
+node_modules
+# compiled css
+themes/hugo-void/assets/css/style.css

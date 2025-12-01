@@ -2,7 +2,7 @@
 title: Configure My X1 Carbon
 date: '2014-12-08 20:16:36'
 tags:
-    - project
+    - linux
 ---
 
 配置我的笔记本的过程

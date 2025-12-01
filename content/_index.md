@@ -1,17 +1,12 @@
 ---
 title: Hello Hugo
 date: '2024-08-25 18:46:00'
-tags:
-    - software
 ---
 
-# Hugo 上线
+# Pluto 的零散记录
 
-把多年没有更新的 hyde 转到了 hugo 平台，过程还算顺利，md 的格式也差别不大。
-
-# Cloudflare
-
-选择 cloudflare 的 pages 主要有两个好处，一是方便，自动从 github 部属，不用写 action；另外是速度比较快，不会像 github 似的经常无法访问。
+Pluto 是开源软件爱好者，日常使用 void/debian/arch Linux 发行版。兴趣爱好包括人工智能、嵌入式系统等
+领域，这里仅作为个人的随性记录，希望也能对他人有所启发。
 
 # 版权说明
 

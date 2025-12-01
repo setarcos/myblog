@@ -2,7 +2,7 @@
 title: Cangkufan(Sokoban)
 date: '2013-12-15 14:00:00'
 tags:
-    - project
+    - programming
 ---
 
 Cangkufan is an implementation of the Sokoban puzzle game invented by Hiroyuki Imabayashi.
