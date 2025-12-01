@@ -19,3 +19,9 @@ Pluto 是开源软件爱好者，日常使用 void/debian/arch Linux 发行版�
 - **禁止演绎（ND）**：禁止修改原文内容
 
 如需其他授权方式，请通过[联系方式](mailto:yangyj.ee@gmail.com)与我协商。
+
+# 其它项目
+
+- 🐶 我的 github [仓库](https://github.com/setarcos)
+- 🐉 龙芯 Archlinux [维护工具](https://loongarchlinux.lcpu.dev)。
+- 🐦 我的鸟笼温度监控[页面](birdroom)，前端源码从[这里](https://github.com/setarcos/birdroom)查看。
