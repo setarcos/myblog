@@ -1,10 +1,50 @@
 baseURL = 'https://example.org/'
 languageCode = 'zh-cn'
 title = 'Pluto 的零散记录'
-theme = 'hugo-flex'
+theme = 'hugo-void'
 enableInlineShortcodes = true
 
 [params]
   description = "不定期记录一些个人收获"
   footer = "Copyright © 2012–2024, Yanjun Yang(Pluto), all rights reserved."
   noClasses = true
+  [params.social]
+    github = "https://github.com/setarcos"
+
+# Main menu
+[[menus.main]]
+name = 'Home'
+pageRef = '/'
+weight = 10
+
+[[menus.main]]
+name = 'Posts'
+pageRef = '/post'
+weight = 20
+
+[[menus.main]]
+name = 'Project'
+pageRef = '/proj'
+weight = 20
+
+[[menus.main]]
+name = 'Tags'
+pageRef = '/tags'
+weight = 30
+
+[[menus.main]]
+name = 'About'
+pageRef = '/about'
+weight = 40
+
+# Table of Contents (recommended)
+[markup]
+  [markup.tableOfContents]
+    startLevel = 1
+    endLevel = 6
+    ordered = false
+
+# Allow raw HTML within Markdown (for KaTeX, etc.)
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true

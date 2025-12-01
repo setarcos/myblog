@@ -1,0 +1,167 @@
+# 页脚翻译
+[footer_share_knowledge]
+other = "分享知识、经验和想法"
+  
+# 导航部分
+[footer_navigation]
+other = "导航"
+  
+# 联系部分
+[footer_stay_connected]
+other = "保持联系"
+  
+[footer_subscribe_contact]
+other = "订阅我的内容或联系我"
+  
+[footer_contact_me]
+other = "联系我"
+
+# 社交媒体
+[footer_github]
+other = "GitHub"
+
+[footer_zhihu]
+other = "知乎"
+
+[footer_email]
+other = "邮箱"
+  
+# 版权部分
+[footer_rights_reserved]
+other = "保留所有权利"
+  
+[footer_built_with]
+other = "使用"
+  
+[footer_built]
+other = "构建"
+  
+[footer_theme]
+other = "主题"
+
+# 首页
+[home_recent_posts]
+other = "最新文章"
+
+[home_view_all_posts]
+other = "查看所有文章"
+
+[home_welcome]
+other = "欢迎来到我的博客"
+
+# 列表页面
+[list_read_more]
+other = "阅读全文"
+
+[year_indicator]
+other = "年份指示器"
+
+[decorative_halo]
+other = "装饰性光晕"
+
+[article_list]
+other = "文章列表"
+
+[list_view_by_year]
+other = "按年份查看"
+
+[list_view_by_category]
+other = "按分类查看"
+
+[list_article_count]
+other = "共 {{ .Count }} 篇文章"
+
+# About页面
+[about_skills]
+other = "技能"
+
+[about_experience]
+other = "经历"
+
+[about_education]
+other = "教育背景"
+
+[about_projects]
+other = "项目经验"
+
+[about_interests]
+other = "兴趣爱好"
+
+[about_contact]
+other = "联系方式"
+
+[about_research]
+other = "研究经历"
+
+[about_download_cv]
+other = "下载简历"
+
+[about_view_cv]
+other = "查看完整简历"
+
+[about_personal_summary]
+other = "个人总结"
+
+# 文章页面
+[reading_time]
+other = "分钟阅读"
+
+[back_to_home]
+other = "返回首页"
+
+# 文章日期格式
+[date_month_day_format]
+other = "01月02日"
+
+[date_year]
+other = "年"
+
+# 标签相关
+[tag_icon_title]
+other = "标签"
+
+[all_tags]
+other = "所有标签"
+
+[tags_help_text]
+other = "点击任意标签查看相关文章"
+
+[articles]
+other = "篇文章"
+
+# 通用按钮和提示
+[back_to_top]
+other = "返回顶部"
+
+[search_placeholder]
+other = "搜索..."
+
+[pagination_next]
+other = "下一页"
+
+[pagination_previous]
+other = "上一页"
+
+[pagination_page]
+other = "第 {{ .PageNumber }} 页"
+
+[related_posts]
+other = "相关文章"
+
+[table_of_contents]
+other = "目录"
+
+[comments]
+other = "评论"
+
+[share]
+other = "分享"
+
+[last_updated]
+other = "最后更新于"
+
+[load_comments]
+other = "加载评论"
+
+[page_views]
+other = "阅读量"

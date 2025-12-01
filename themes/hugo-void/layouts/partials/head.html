@@ -1,0 +1,47 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ printf "%s | %s" .Title site.Title }}{{ end }}</title>
+
+<!-- Prevent theme flash: set dark class ASAP and background color before CSS loads -->
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1220">
+<script>
+  (function() {
+    try {
+      var t = localStorage.getItem('theme');
+      var dark = t ? (t === 'dark') : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (dark) document.documentElement.classList.add('dark');
+    } catch (_) {}
+  })();
+  </script>
+<style>
+  /* Minimal pre-CSS paint to avoid white flash on dark */
+  html.dark, html.dark body { background-color: #0b1220; }
+  html { color-scheme: light dark; }
+  </style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- Speed up Busuanzi counter load -->
+<link rel="dns-prefetch" href="//busuanzi.ibruce.info">
+<link rel="preconnect" href="https://busuanzi.ibruce.info" crossorigin>
+
+<!-- Favicon configuration -->
+<link rel="icon" type="image/png" href="{{ "favicon/favicon-96x96.png" | relURL }}" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="{{ "favicon/favicon.svg" | relURL }}" />
+<link rel="shortcut icon" href="{{ "favicon/favicon.ico" | relURL }}" />
+<link rel="apple-touch-icon" sizes="180x180" href="{{ "favicon/apple-touch-icon.png" | relURL }}" />
+<link rel="manifest" href="{{ "favicon/site.webmanifest" | relURL }}" />
+<!-- End of favicon configuration -->
+
+{{ if eq hugo.Environment "development" }}
+  {{ partial "head/css.html" . }}
+  {{ partial "head/js.html" . }}
+{{ else }}
+  {{ partialCached "head/css.html" . }}
+  {{ partialCached "head/js.html" . }}
+{{ end }}
+
+<!-- Busuanzi page/site view counter (load early to avoid delayed render) -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>

@@ -1,0 +1,155 @@
+# Footer translations
+[footer_share_knowledge]
+other = "Sharing knowledge, experience, and ideas"
+  
+# Navigation section
+[footer_navigation]
+other = "Navigation"
+  
+# Contact section
+[footer_stay_connected]
+other = "Stay Connected"
+  
+[footer_subscribe_contact]
+other = "Subscribe to my content or contact me"
+  
+[footer_contact_me]
+other = "Contact Me"
+
+# Social media
+[footer_github]
+other = "GitHub"
+
+[footer_zhihu]
+other = "Zhihu"
+
+[footer_email]
+other = "Email"
+  
+# Copyright section
+[footer_rights_reserved]
+other = "All Rights Reserved"
+  
+[footer_built_with]
+other = "Built with"
+  
+[footer_built]
+other = "Built"
+  
+[footer_theme]
+other = "Theme"
+
+# Homepage
+[home_recent_posts]
+other = "Recent Posts"
+
+[home_view_all_posts]
+other = "View All Posts"
+
+[home_welcome]
+other = "Welcome to my blog"
+
+# List page
+[list_read_more]
+other = "Read more"
+
+[year_indicator]
+other = "Year indicator"
+
+[decorative_halo]
+other = "Decorative halo"
+
+[article_list]
+other = "Article list"
+
+[list_view_by_year]
+other = "View by year"
+
+[list_view_by_category]
+other = "View by category"
+
+[list_article_count]
+other = "{{ .Count }} articles in total"
+
+# About page
+[about_skills]
+other = "Skills"
+
+[about_experience]
+other = "Experience"
+
+[about_education]
+other = "Education"
+
+[about_projects]
+other = "Projects"
+
+[about_interests]
+other = "Interests"
+
+[about_contact]
+other = "Contact"
+
+# Article page
+[reading_time]
+other = "min read"
+
+[page_views]
+other = "Page Views"
+
+[back_to_home]
+other = "Back to Home"
+
+# Article date format
+[date_month_day_format]
+other = "Jan 02"
+
+[date_year]
+other = ""
+
+# Tags related
+[tag_icon_title]
+other = "Tag"
+
+[all_tags]
+other = "All Tags"
+
+[tags_help_text]
+other = "Click on any tag to view related articles"
+
+[articles]
+other = "articles"
+
+# Common buttons and tips
+[back_to_top]
+other = "Back to top"
+
+[search_placeholder]
+other = "Search..."
+
+[pagination_next]
+other = "Next"
+
+[pagination_previous]
+other = "Previous"
+
+[pagination_page]
+other = "Page {{ .PageNumber }}"
+
+[related_posts]
+other = "Related Posts"
+
+[table_of_contents]
+other = "Table of Contents"
+
+[comments]
+other = "Comments"
+
+[share]
+other = "Share"
+
+[last_updated]
+other = "Last updated on"
+
+[load_comments]
+other = "Load Comments" 

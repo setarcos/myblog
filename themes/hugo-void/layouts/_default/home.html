@@ -1,0 +1,20 @@
+{{ define "main" }}
+  <div class="max-w-3xl mx-auto min-h-[70vh] flex items-center justify-center px-4 relative">
+    <!-- 背景装饰已移除 -->
+
+    <div class="w-full text-center">
+      {{ with .Site.Params.avatar }}
+      <div class="mx-auto mb-10 w-32 h-32 md:w-40 md:h-40 relative group">
+        <!-- 头像装饰光晕移除，保持简洁 -->
+        <div class="rounded-full overflow-hidden border-2 border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 relative">
+          <img src="{{ .url }}" alt="{{ $.Site.Title }}" class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105">
+        </div>
+      </div>
+      {{ end }}
+      <div class="prose prose-lg md:prose-xl text-left">
+        {{ .Content }}
+      </div>
+
+    </div>
+  </div>
+{{ end }}
