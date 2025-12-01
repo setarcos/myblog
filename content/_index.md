@@ -3,16 +3,16 @@ title: Hello Hugo
 date: '2024-08-25 18:46:00'
 ---
 
-# Pluto 的零散记录
+<p align="center">
+  <img src="/static/wren.png" alt="Wren" style="width: 200px;box-shadow:none;">
+</p>
 
 Pluto 是开源软件爱好者，日常使用 void/debian/arch Linux 发行版。兴趣爱好包括人工智能、嵌入式系统等
 领域，这里仅作为个人的随性记录，希望也能对他人有所启发。
 
 # 版权说明
 
-本站未注明授权的博文默认采用 [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh) 协议共享。
-
-[![CC BY-NC-ND 4.0](https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh)
+本站未注明授权的博文默认采用 [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh) 协议共享。<img src="https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png" alt="CC BY-NC-ND 4.0" style="display: inline; vertical-align: middle;">
 
 - **署名（BY）**：转载需注明作者和原文链接
 - **非商业（NC）**：禁止将内容用于商业用途
