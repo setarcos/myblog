@@ -28,8 +28,7 @@ tags:
 $ rustup target add x86_64-pc-windows-msvc
 $ cargo install --locked cargo-xwin
 ```
-Linux 平台应该也需要一些依赖，官网只提到了 `llvm`，`lld`，由于我的电脑上工具比较全，有
-机会用 Docker 查看一下完整的依赖。
+Linux 平台应该也需要一些依赖，官网只提到了 `llvm`，`lld`，完整的依赖可以参考我后来整理的[Dokerfile](https://github.com/setarcos/Dockerfiles/tree/master/tauri-xwin)。
 
 还要安装 NSIS 作为安装包构建工具，这个比较麻烦，官网的做法在我电脑上行不通，我主要采用
 源码编译的方式（void 发行版没有打包 nsis）：
