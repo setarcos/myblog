@@ -106,6 +106,18 @@ zephyr_library_sources_ifdef(CONFIG_GPIO_PE220X     gpio_pe220x.c)
 
 # 上层应用
 
+首先要增加一个 dts 的 overlay 文件对处理器管脚进行设置，这个文件要和开发板同名（e2000q_demo.overlay），下面示例配置了 GPIO4_13，具体 pinmux 参数也是参考了 SDK 的代码。
+
+```dts
+#include <zephyr/dt-bindings/pinctrl/phytium-pe2204-pinctrl.h>
+
+&pinctrl {
+	gpio4_13_default: gpio4_13_default {
+		pinmux = <PHYTIUM_PINMUX(FIOPAD_AA47_REG0_OFFSET, FIOPAD_FUNC6)>;
+	};
+};
+```
+
 在 C 语言中使用标准的 GPIO API 就可以使用这个驱动了：
 
 ```c
@@ -113,4 +125,21 @@ const struct device *gpio = DEVICE_DT_GET(DT_NODELABEL(gpio4));
 
 gpio_pin_configure(gpio, 13, GPIO_OUTPUT_ACTIVE);
 gpio_pin_set(gpio, 13, 1);
+```
+
+另外配置文件中要增加 GPIO 相关设置：
+
+```text
+CONFIG_GPIO=y
+CONFIG_GPIO_PE220X=y
+```
+
+如果需要更多的调试信息，比如查看 printk 的输出，还需要增加如下设置：
+
+```text
+CONFIG_LOG_PRINTK=n
+CONFIG_PRINTK=y
+CONFIG_LOG=y
+CONFIG_LOG_MAX_LEVEL=4
+CONFIG_DEBUG_INFO=y
 ```
