@@ -30,7 +30,11 @@ input type:touchpad {
 ## 窗口自动工作区布局
 
 之前可以使用 `assign [class="Firefox"] $ws2` 将 Firefox 缺省放到特定的工作区，在 sway 中需要把
-`class` 换为 `app_id`。
+`class` 换为 `app_id`。部分程序不遵循 Wayland 的协议可以使用 `instance` 来识别。比如 VncViewer：
+
+```bash
+assign [instance="vncviewer"] $ws5
+```
 
 ## 不支持的选项
 
@@ -52,6 +56,18 @@ bindsym --release Print exec grim -g "$(slurp -d)" - | wl-copy -t image/png
 
 其中 `wl-copy` 用来把图像放到剪贴板，之前的 `xclip` 也不能用了。
 
+## 多显示器
+
+显示器的命名也和 x11 不一样，编号缺省从 1 开始，而 x11 是从 0 开始的。对显示器的配置也
+比较直观：
+
+```bash
+swaymsg output HDMI-A-1 transform 180
+swaymsg output HDMI-A-1 mode 720x400
+swaymsg output HDMI-A-1 position 0 0
+swaymsg output DP-1 position 0 400
+```
+
 # 其它杂项
 
 ## nvim 剪贴板
@@ -60,5 +76,5 @@ bindsym --release Print exec grim -g "$(slurp -d)" - | wl-copy -t image/png
 
 ## 系统托盘图标
 
-sway 自带的 bar 总是无法显示托盘图标，只好更换为 waybar，它的定制化也很强，还没有仔细研究。
+sway 自带的 bar 总是无法显示托盘图标（高版本好像就支持了，目前 void 带的版本比较低），只好更换为 waybar，它使用 css 配置外观，定制性很强。
 
