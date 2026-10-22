@@ -39,7 +39,8 @@
   {{ partial "head/css.html" . }}
   {{ partial "head/js.html" . }}
 {{ else }}
-  {{ partialCached "head/css.html" . }}
+  {{/* css.html uses templates.Defer, which is not allowed inside partialCached */}}
+  {{ partial "head/css.html" . }}
   {{ partialCached "head/js.html" . }}
 {{ end }}
 

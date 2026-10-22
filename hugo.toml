@@ -1,5 +1,5 @@
 baseURL = 'https://example.org/'
-languageCode = 'zh-cn'
+locale = 'zh-cn'
 title = 'Pluto 的零散记录'
 theme = 'hugo-void'
 enableInlineShortcodes = true
@@ -43,3 +43,7 @@ weight = 40
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
+
+# Allow the Tailwind CLI used by the hugo-void theme (css.TailwindCSS)
+[security.exec]
+  allow = ['^(dart-)?sass(-embedded)?$', '^go$', '^git$', '^postcss$', '^node$', '^tailwindcss$']
