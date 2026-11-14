@@ -24,3 +24,4 @@ Pluto 是开源软件爱好者，日常使用 void/debian/arch Linux 发行版�
 
 - 🐶 我的 github [仓库](https://github.com/setarcos)
 - 🐉 龙芯 Archlinux [维护工具](https://loongarchlinux.lcpu.dev)。
+- 🎮 [六边形俄罗斯方块](/hex-tetris/)（Hex Tetris 小游戏）

@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a0c11">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Hex Tetris - 六边形俄罗斯方块</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%; margin: 0;
+    background: #0a0c11; color: #ebf0ee;
+    font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB",
+                 "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    overflow: hidden; overscroll-behavior: none;
+    -webkit-user-select: none; user-select: none;
+    touch-action: manipulation;
+  }
+  #app {
+    position: fixed; inset: 0;
+    display: grid;
+    grid-template-areas: "hud" "board" "pad";
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+             env(safe-area-inset-bottom) env(safe-area-inset-left);
+    touch-action: none;
+  }
+
+  /* ---------------------------------------------------------------- HUD */
+  #hud { grid-area: hud; display: flex; align-items: center; gap: 8px; padding: 6px 10px 2px; }
+  .stat { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .stat > span { font-size: 10px; color: #7f9c92; letter-spacing: .5px; }
+  .stat > b { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .spacer { flex: 1; }
+  .next { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+  .next > span { font-size: 10px; color: #7f9c92; letter-spacing: .5px; }
+  #next { width: 56px; height: 40px; display: block; }
+  .icon {
+    width: 38px; height: 38px; flex: 0 0 auto; padding: 0;
+    display: grid; place-items: center;
+    border-radius: 11px; border: 1px solid #2e4e42;
+    background: #141c24; color: #dfe9e4; font: inherit; font-size: 15px;
+  }
+  .icon:active { background: #1e3a32; }
+
+  /* -------------------------------------------------------------- board */
+  #boardWrap { grid-area: board; position: relative; min-width: 0; min-height: 0; touch-action: none; }
+  #board { display: block; width: 100%; height: 100%; }
+
+  /* ---------------------------------------------------------------- pad */
+  #pad { grid-area: pad; display: grid; gap: 6px; grid-template-columns: repeat(6, 1fr); padding: 6px 8px 8px; }
+  #pad button {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1px; min-width: 0; padding: 0; height: clamp(46px, 9vh, 66px);
+    border-radius: 14px; border: 1px solid #2e4e42;
+    background: #141c24; color: #dfe9e4;
+    font: inherit; font-size: 22px; line-height: 1;
+    touch-action: none; transition: background .08s, transform .08s;
+  }
+  #pad button .t { font-size: 10px; color: #7f9c92; letter-spacing: .5px; }
+  #pad button.on { background: #1e3a32; border-color: #4f8f77; transform: translateY(1px); }
+
+  /* ------------------------------------------------------------ overlay */
+  #overlay {
+    position: fixed; inset: 0; z-index: 10; display: none;
+    align-items: center; justify-content: center; padding: 18px;
+    background: rgba(0, 0, 0, .74);
+  }
+  #overlay.show { display: flex; }
+  #ovCard {
+    width: min(360px, 100%); max-height: 100%; overflow: auto;
+    display: flex; flex-direction: column; gap: 10px; text-align: center;
+    padding: 18px 16px; border-radius: 18px;
+    border: 1px solid #2e4e42; background: #101720;
+  }
+  #ovCard h2 { margin: 0; font-size: 22px; letter-spacing: 2px; color: #f0d246; }
+  #ovCard h3 { margin: 4px 0 0; font-size: 11px; letter-spacing: 2px; color: #50dce6; }
+  #ovCard p { margin: 0; font-size: 13px; line-height: 1.6; color: #96afa5; }
+  #ovCard .big { font-size: 26px; color: #ebf0ee; font-variant-numeric: tabular-nums; }
+  #ovCard .rank { color: #50dce6; font-size: 14px; }
+  #ovCard .row { display: flex; gap: 8px; }
+  #ovCard button {
+    flex: 1; height: 44px; border-radius: 12px; padding: 0 10px;
+    border: 1px solid #2e4e42; background: #1b2a24; color: #ebf0ee;
+    font: inherit; font-size: 15px;
+  }
+  #ovCard button.primary { background: #245f4c; border-color: #4f8f77; }
+  #ovCard button:active { filter: brightness(1.25); }
+  #nameInput {
+    height: 44px; padding: 0 10px; text-align: center; outline: none;
+    border-radius: 12px; border: 1px solid #2e4e42;
+    background: #0b1116; color: #ebf0ee; font: inherit; font-size: 17px;
+    -webkit-user-select: text; user-select: text;
+  }
+  .hs { display: flex; flex-direction: column; }
+  .hs-row { display: flex; align-items: center; gap: 8px; padding: 2px; font-size: 13px; }
+  .hs-row.top { color: #f0d246; }
+  .hs-i { width: 14px; text-align: right; color: #7f9c92; }
+  .hs-n { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hs-s { font-variant-numeric: tabular-nums; }
+
+  /* -------------------------------------------------- 横屏 / 宽屏布局 */
+  @media (orientation: landscape) and (min-width: 560px) {
+    #app {
+      grid-template-areas: "board hud" "board pad";
+      grid-template-columns: minmax(0, 1fr) min(34vw, 300px);
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+    #hud { flex-wrap: wrap; gap: 10px; padding: 10px 10px 2px; }
+    #pad { grid-template-columns: repeat(3, 1fr); align-content: start; padding: 6px 10px 10px; }
+    #pad button { height: clamp(44px, 14vh, 62px); }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="hud">
+    <div class="stat"><span id="lScore">得分</span><b id="vScore">0</b></div>
+    <div class="stat"><span id="lBest">最高</span><b id="vBest">0</b></div>
+    <div class="stat"><span id="lLines">消行</span><b id="vLines">0</b></div>
+    <div class="stat"><span id="lLevel">等级</span><b id="vLevel">1</b></div>
+    <div class="spacer"></div>
+    <div class="next"><span id="lNext">NEXT</span><canvas id="next"></canvas></div>
+    <button id="btnSound" class="icon" type="button">&#128266;</button>
+    <button id="btnPause" class="icon" type="button">&#9208;</button>
+  </header>
+  <main id="boardWrap"><canvas id="board"></canvas></main>
+  <footer id="pad"></footer>
+</div>
+<div id="overlay"><div id="ovCard"></div></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ================================================================ 文案 */
+const STRINGS = {
+  zh: {
+    score: '得分', best: '最高', lines: '消行', level: '等级', next: 'NEXT',
+    paused: '已暂停', gameOver: '游戏结束', top5: 'TOP 5', noRecords: '暂无记录',
+    resume: '继续', restart: '重新开始', again: '再来一局', confirm: '确认',
+    scoreLine: '得分 %d',
+    newRecord: '新纪录！输入名字（最多 %d 字符）',
+    rank: '第 %d 名 · 最高分 %d',
+    bestOnly: '最高分 %d',
+    padHelp: '← ↓ → 移动 / 加速 · ↻ ↺ 旋转 · ⤓ 硬降',
+    gestureHelp: '手势：左右滑移动 · 下滑软降 · 下甩硬降 · 轻点旋转',
+    anon: '无名玩家', pause: '暂停', soundOn: '关闭音效', soundOff: '打开音效',
+    pad: { left: '左移', down: '软降', right: '右移', cw: '顺旋', ccw: '逆旋', drop: '硬降' },
+  },
+  en: {
+    score: 'SCORE', best: 'BEST', lines: 'LINES', level: 'LEVEL', next: 'NEXT',
+    paused: 'PAUSED', gameOver: 'GAME OVER', top5: 'TOP 5', noRecords: 'No records yet',
+    resume: 'Resume', restart: 'Restart', again: 'Play again', confirm: 'OK',
+    scoreLine: 'Score %d',
+    newRecord: 'New record! Enter your name (max %d)',
+    rank: 'Rank %d · Best %d',
+    bestOnly: 'Best %d',
+    padHelp: '← ↓ → move / soft drop · ↻ ↺ rotate · ⤓ hard drop',
+    gestureHelp: 'Touch: swipe to move · drag down to drop · flick to slam · tap to rotate',
+    anon: 'Anonymous', pause: 'Pause', soundOn: 'Mute', soundOff: 'Unmute',
+    pad: { left: 'Left', down: 'Down', right: 'Right', cw: 'CW', ccw: 'CCW', drop: 'Drop' },
+  },
+};
+const LANG = (navigator.language || 'zh').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+const T = STRINGS[LANG];
+
+/* ====================================================== 棋盘拓扑 / 方块 */
+// 平顶六边形，轴向坐标 (q, r)，列是竖直直线；棋盘本身也是一个六边形。
+const Q_MAX = 7, R_MAX = 11, S_MAX = 11;
+const BOARD_ROWS = 2 * R_MAX + 1;      // 最高一列的格数 = 23
+const BOARD_SPAN = 3 * Q_MAX + 2;      // 棋盘宽/高都 = BOARD_SPAN * S
+
+const PIECES = {
+  I: [[0, 0], [1, 0], [2, 0], [3, 0]],
+  O: [[0, 0], [1, 0], [0, 1], [1, 1]],
+  T: [[0, 0], [1, 0], [2, 0], [1, -1]],
+  L: [[0, 0], [1, 0], [2, 0], [0, 1]],
+  J: [[0, 0], [1, 0], [2, 0], [2, 1]],
+  S: [[0, 0], [1, 0], [1, 1], [2, 1]],
+  Z: [[0, 0], [0, 1], [1, 1], [1, 2]],
+  R: [[0, 0], [0, 1], [0, 2], [1, 2]],
+  N: [[0, 0], [0, 1], [1, 1], [2, 0]],
+  Y: [[0, 1], [1, 1], [1, 2], [2, 0]],
+};
+const COLORS = {
+  I: '#50dce6', O: '#f0d246', T: '#aa5adc', L: '#f0963c', J: '#4678e6',
+  S: '#5ac85a', Z: '#e65050', R: '#3cbea0', N: '#eb78c8', Y: '#aad250',
+};
+
+const kk = (q, r) => q * 100 + r;          // |r| < 50，键唯一
+const BOARD_CELLS = [];
+for (let q = -Q_MAX; q <= Q_MAX; q++)
+  for (let r = -R_MAX; r <= R_MAX; r++)
+    if (Math.abs(q + r) <= S_MAX) BOARD_CELLS.push([q, r]);
+const BOARD_SET = new Set(BOARD_CELLS.map(([q, r]) => kk(q, r)));
+
+// 消行 = 与底边平行的斜线，分左右两半，每行最多 8 格；竖直列不消。
+const LEFT_ROWS = [], RIGHT_ROWS = [];
+for (let r = -R_MAX; r <= R_MAX; r++) {
+  const row = [];
+  for (let q = -Q_MAX; q <= 0; q++) if (BOARD_SET.has(kk(q, r))) row.push([q, r]);
+  LEFT_ROWS.push(row);
+}
+for (let s = -S_MAX; s <= S_MAX; s++) {
+  const row = [];
+  for (let q = 0; q <= Q_MAX; q++) if (BOARD_SET.has(kk(q, -s - q))) row.push([q, -s - q]);
+  RIGHT_ROWS.push(row);
+}
+const ROWS = [], seenRows = new Set();
+for (const row of LEFT_ROWS.concat(RIGHT_ROWS)) {
+  if (!row.length) continue;
+  const key = row.map(([q, r]) => kk(q, r)).sort((a, b) => a - b).join('|');
+  if (seenRows.has(key)) continue;
+  seenRows.add(key);
+  ROWS.push(row);
+}
+
+// ---------------------------------------------------------------- 旋转
+const rotCW = cells => cells.map(([q, r]) => [-r, q + r]);
+
+// 枢轴只能是离重心最近的自身格子（绕顶点旋转会把格子甩到半格位置）
+function piecePivot(name) {
+  const cells = PIECES[name];
+  const cq = cells.reduce((a, [q]) => a + q, 0) / cells.length;
+  const cr = cells.reduce((a, [, r]) => a + r, 0) / cells.length;
+  const scored = cells.map(([q, r]) => {
+    let far = 0;
+    for (const [a, b] of cells)
+      far = Math.max(far, Math.abs(q - a) + Math.abs(r - b) + Math.abs((a + b) - (q + r)));
+    return { q, r, d: (q - cq) ** 2 + (r - cr) ** 2, far };
+  });
+  scored.sort((a, b) => a.d - b.d || a.far - b.far || a.q - b.q || a.r - b.r);
+  return [scored[0].q, scored[0].r];
+}
+
+// REL[name][rot] = 各格相对枢轴的轴向坐标（已旋转 rot × 60°）
+const REL = {};
+for (const name of Object.keys(PIECES)) {
+  const [pq, pr] = piecePivot(name);
+  let cells = PIECES[name].map(([q, r]) => [q - pq, r - pr]);
+  REL[name] = [];
+  for (let rot = 0; rot < 6; rot++) {
+    REL[name].push(cells);
+    cells = rotCW(cells);
+  }
+}
+
+/* ================================================================ 音效 */
+// 与 Python 版一致：代码合成正弦/方波 + 衰减包络，不加载音频文件。
+// [频率, 时长, 音量, 滑音终点, 波形]
+const SOUND_SPECS = {
+  move:   [[240, .035, .22, 0, 'square']],
+  rotate: [[360, .04, .22, 0, 'square'], [500, .03, .18, 0, 'square']],
+  lock:   [[190, .09, .5, 90, 'sine']],
+  clear1: [[523, .07, .4, 0, 'sine'], [784, .12, .4, 0, 'sine']],
+  clear2: [[523, .06, .4, 0, 'sine'], [659, .06, .4, 0, 'sine'], [784, .14, .4, 0, 'sine']],
+  clear3: [[523, .06, .4, 0, 'sine'], [659, .06, .4, 0, 'sine'],
+           [784, .06, .4, 0, 'sine'], [1047, .16, .4, 0, 'sine']],
+  level:  [[0, .22, 0, 0, 'sine'], [659, .09, .4, 0, 'sine'], [988, .16, .4, 0, 'sine']],
+  over:   [[392, .16, .4, 330, 'sine'], [262, .32, .4, 110, 'sine']],
+  pause:  [[520, .05, .28, 0, 'square']],
+};
+
+const SOUND_KEY = 'hexTetris.sound', SCORE_KEY = 'hexTetris.scores';
+let acx = null, master = null;
+let soundOn = readFlag(SOUND_KEY, true);
+
+function readFlag(key, dflt) {
+  try { const v = localStorage.getItem(key); return v === null ? dflt : v === '1'; }
+  catch (e) { return dflt; }
+}
+function writeFlag(key, on) {
+  try { localStorage.setItem(key, on ? '1' : '0'); } catch (e) { /* 忽略 */ }
+}
+
+function unlockAudio() {
+  if (!acx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      acx = new AC();
+      master = acx.createGain();
+      master.gain.value = 0.16;
+      master.connect(acx.destination);
+    } catch (e) { acx = null; return; }
+  }
+  if (acx.state === 'suspended') acx.resume();
+}
+
+function playNote(freq, dur, vol, slide, kind, at) {
+  const osc = acx.createOscillator(), gain = acx.createGain();
+  osc.type = kind === 'square' ? 'square' : 'sine';
+  osc.frequency.setValueAtTime(freq, at);
+  if (slide) osc.frequency.exponentialRampToValueAtTime(slide, at + dur);
+  gain.gain.setValueAtTime(0.0001, at);
+  gain.gain.linearRampToValueAtTime(vol, at + 0.004);      // 4ms 淡入，避免爆音
+  gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, vol * 0.02), at + dur);
+  osc.connect(gain).connect(master);
+  osc.start(at);
+  osc.stop(at + dur + 0.02);
+}
+
+function play(name) {
+  if (!soundOn || !acx) return;
+  const parts = SOUND_SPECS[name];
+  if (!parts) return;
+  let t = acx.currentTime;
+  for (const [freq, dur, vol, slide, kind] of parts) {
+    if (freq > 0) playNote(freq, dur, vol, slide, kind, t);
+    t += dur;                                              // 音符依序排列
+  }
+}
+
+/* ============================================================== 最高分 */
+let scores = loadScores();
+
+function loadScores() {
+  let raw;
+  try { raw = JSON.parse(localStorage.getItem(SCORE_KEY) || 'null'); }
+  catch (e) { return []; }
+  if (raw && !Array.isArray(raw) && Array.isArray(raw.scores)) raw = raw.scores;
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map(item => ({
+      name: String((item && item.name) || '').trim().slice(0, 10) || T.anon,
+      score: Math.max(0, parseInt(item && item.score, 10) || 0),
+    }))
+    .filter(e => e.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+}
+
+function saveScores(list) {
+  try { localStorage.setItem(SCORE_KEY, JSON.stringify({ scores: list })); }
+  catch (e) { /* 隐私模式下写入失败，忽略 */ }
+}
+
+const bestScore = () => (scores.length ? scores[0].score : 0);
+
+/* ================================================================ 状态 */
+const GRAVITY_BASE = 1040, GRAVITY_MIN = 180, LOCK_DELAY = 840;
+const DAS = 340, DAS_REPEAT = 110, SOFT_DROP_MS = 55, SPAWN_PAUSE = 150;
+const DOWN = [0, 1];
+// 左右跨一列有两种竖向分量，同方向连按时交替（斜下 → 斜上 → 斜下 …），
+// 连按左右就是横着走；首选被挡时改走另一斜向。
+const LATERAL = {
+  '-1': [[-1, 1], [-1, 0]],      // 左：左下 / 左上
+  '1': [[1, 0], [1, -1]],        // 右：右下 / 右上
+};
+const KICKS = [[0, 0], [-1, 1], [1, 0], [0, 1], [0, -1], [-1, 0], [1, -1]];
+
+const state = {
+  filled: new Map(),          // kk(q,r) -> { q, r, c }
+  score: 0, lines: 0, level: 1,
+  gameOver: false, paused: false,
+  piece: null, next: null, bag: [],
+  dropTimer: 0, lockTimer: 0, spawnTimer: 0,
+  dasDir: 0, dasTimer: 0,
+  lateralDir: 0, lateralNextUp: false,   // 同方向连按时竖向上下交替
+  softButton: false, softTouch: false,
+  nameEntry: null, lastRank: null,
+};
+
+function drawName() {
+  if (!state.bag.length) {
+    state.bag = Object.keys(PIECES);
+    for (let i = state.bag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [state.bag[i], state.bag[j]] = [state.bag[j], state.bag[i]];
+    }
+  }
+  return state.bag.pop();
+}
+
+// 出生点固定在顶部居中 q = 0；该处被占即返回 null（判定结束）
+function spawn(name) {
+  const rel = REL[name][0];
+  let ar = null;
+  for (let r = -S_MAX - 4; r <= R_MAX; r++) {
+    if (rel.every(([q, rr]) => BOARD_SET.has(kk(q, rr + r)))) { ar = r; break; }
+  }
+  if (ar === null) return null;
+  if (rel.some(([q, r]) => state.filled.has(kk(q, r + ar)))) return null;
+  return { name, rot: 0, q: 0, r: ar };
+}
+
+const cellsAt = (piece, q, r) => REL[piece.name][piece.rot].map(([cq, cr]) => [cq + q, cr + r]);
+const curCells = () => cellsAt(state.piece, state.piece.q, state.piece.r);
+const fits = cells =>
+  cells.every(([q, r]) => BOARD_SET.has(kk(q, r)) && !state.filled.has(kk(q, r)));
+const canFall = () => fits(cellsAt(state.piece, state.piece.q, state.piece.r + 1));
+const gravityMs = () => Math.max(GRAVITY_MIN, GRAVITY_BASE - (state.level - 1) * 90);
+
+function reset() {
+  state.filled.clear();
+  state.score = 0; state.lines = 0; state.level = 1;
+  state.gameOver = false; state.paused = false;
+  state.nameEntry = null; state.lastRank = null;
+  state.bag = [];
+  state.dropTimer = 0; state.lockTimer = 0; state.spawnTimer = 0;
+  state.dasDir = 0; state.dasTimer = 0;
+  state.lateralDir = 0; state.lateralNextUp = false;
+  state.softButton = false; state.softTouch = false;
+  state.piece = spawn(drawName());
+  state.next = drawName();
+  hideOverlay();
+  updateIcons();
+  if (!state.piece) finishGame();
+  updateHud();
+  drawPreview();
+}
+
+/* ------------------------------------------------------------- 操作 */
+function tryMove(dq, dr) {
+  const p = state.piece;
+  if (!p) return false;
+  if (!fits(cellsAt(p, p.q + dq, p.r + dr))) return false;
+  p.q += dq; p.r += dr;
+  state.lockTimer = 0;
+  if (dq !== 0) play('move');              // 只有左右跨列才响
+  return true;
+}
+
+// 跨一列：dir 为 -1 向左、+1 向右。同一方向连按时竖向交替：斜下 → 斜上 → 斜下…
+// 轮到的那一步被墙或方块挡住时，改走同方向的另一斜向。
+function moveLateral(dir) {
+  const [down, up] = LATERAL[dir];
+  const first = (state.lateralDir === dir && state.lateralNextUp) ? up : down;
+  const second = first === up ? down : up;
+  for (const step of [first, second]) {
+    if (tryMove(step[0], step[1])) {
+      state.lateralDir = dir;
+      state.lateralNextUp = step === down;
+      return true;
+    }
+  }
+  return false;
+}
+
+function tryRotate(dir) {
+  const p = state.piece;
+  if (!p) return false;
+  const rot = (p.rot + (dir > 0 ? 1 : -1) + 6) % 6;
+  const rel = REL[p.name][rot];
+  for (const [dq, dr] of KICKS) {
+    if (fits(rel.map(([cq, cr]) => [cq + p.q + dq, cr + p.r + dr]))) {
+      p.rot = rot; p.q += dq; p.r += dr;
+      state.lockTimer = 0;
+      play('rotate');
+      return true;
+    }
+  }
+  return false;
+}
+
+function landingAnchor() {
+  const p = state.piece;
+  let r = p.r;
+  while (fits(cellsAt(p, p.q, r + 1))) r += 1;
+  return r;
+}
+
+function hardDrop() {
+  const p = state.piece;
+  if (!p || state.gameOver || state.paused) return;
+  const r = landingAnchor();
+  state.score += Math.max(0, r - p.r) * 2;
+  p.r = r;
+  lock();
+}
+
+// 原地消除所有填满的 8 格整行，上方方块整体下落，返回消除行数
+function clearFullLines(filled) {
+  const full = ROWS.filter(row =>
+    row.length === 8 && row.every(([q, r]) => filled.has(kk(q, r))));
+  if (!full.length) return 0;
+
+  const removedByCol = new Map();
+  for (const row of full)
+    for (const [q, r] of row) {
+      if (!removedByCol.has(q)) removedByCol.set(q, []);
+      removedByCol.get(q).push(r);
+      filled.delete(kk(q, r));
+    }
+
+  const settled = new Map();
+  for (const cell of filled.values()) {
+    const gone = removedByCol.get(cell.q) || [];
+    const down = gone.filter(r => r > cell.r).length;
+    const r = cell.r + down;
+    settled.set(kk(cell.q, r), { q: cell.q, r, c: cell.c });
+  }
+  filled.clear();
+  for (const [k, v] of settled) filled.set(k, v);
+  return full.length;
+}
+
+function lock() {
+  const p = state.piece;
+  const color = COLORS[p.name];
+  for (const [q, r] of curCells()) state.filled.set(kk(q, r), { q, r, c: color });
+
+  const n = clearFullLines(state.filled);
+  let leveled = false;
+  if (n) {
+    const table = { 1: 100, 2: 400, 3: 900 };
+    state.lines += n;
+    state.score += (table[n] || n * n * 100) * state.level;
+    const lv = 1 + Math.floor(state.lines / 10);
+    leveled = lv > state.level;
+    state.level = lv;
+    play(n >= 3 ? 'clear3' : 'clear' + n);
+  } else {
+    play('lock');
+  }
+  if (leveled) play('level');
+
+  state.piece = spawn(state.next);
+  state.next = drawName();
+  state.lateralDir = 0;
+  state.lateralNextUp = false;
+  state.dropTimer = 0;
+  state.lockTimer = 0;
+  state.spawnTimer = SPAWN_PAUSE;
+  updateHud();
+  drawPreview();
+  if (!state.piece) finishGame();
+}
+
+/* --------------------------------------------------------- 最高分结算 */
+function qualifies() {
+  if (state.score <= 0) return false;
+  if (scores.length < 5) return true;
+  return state.score > scores[scores.length - 1].score;
+}
+
+function finishGame() {
+  play('over');
+  state.gameOver = true;
+  state.dasDir = 0;
+  state.nameEntry = qualifies() ? '' : null;
+  showGameOver();
+}
+
+function submitName() {
+  const name = (state.nameEntry || '').trim().slice(0, 10) || T.anon;
+  const entry = { name, score: state.score };
+  const list = scores.concat([entry]).sort((a, b) => b.score - a.score).slice(0, 5);
+  const rank = list.indexOf(entry) + 1;
+  state.lastRank = rank || null;
+  if (rank) { scores = list; saveScores(list); }
+  state.nameEntry = null;
+  showGameOver();
+  updateHud();
+}
+
+/* ============================================================== 渲染 */
+const el = id => document.getElementById(id);
+const canvas = el('board'), ctx = canvas.getContext('2d');
+const nextCanvas = el('next'), nextCtx = nextCanvas.getContext('2d');
+const boardWrap = el('boardWrap');
+const overlay = el('overlay'), ovCard = el('ovCard');
+const btnSound = el('btnSound'), btnPause = el('btnPause'), pad = el('pad');
+
+let S = 10, HEX_W = 15, HEX_H = 17.32, OX = 0, OY = 0, viewW = 0, viewH = 0;
+
+function resize() {
+  const w = boardWrap.clientWidth, h = boardWrap.clientHeight;
+  if (!w || !h) return;
+  viewW = w; viewH = h;
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const m = 4;
+  S = Math.min((w - 2 * m) / BOARD_SPAN, (h - 2 * m) / (BOARD_ROWS * Math.sqrt(3)));
+  HEX_W = 1.5 * S;
+  HEX_H = Math.sqrt(3) * S;
+  OX = w / 2;
+  OY = h / 2;
+
+  const nw = nextCanvas.clientWidth || 56, nh = nextCanvas.clientHeight || 40;
+  nextCanvas.width = Math.round(nw * dpr);
+  nextCanvas.height = Math.round(nh * dpr);
+  nextCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawPreview();
+}
+
+const cellX = q => OX + HEX_W * q;
+const cellY = (q, r) => OY + HEX_H * (r + q / 2);
+
+function hexPath(g, cx, cy, s) {
+  g.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const a = Math.PI / 3 * i;
+    const x = cx + s * Math.cos(a), y = cy + s * Math.sin(a);
+    if (i) g.lineTo(x, y); else g.moveTo(x, y);
+  }
+  g.closePath();
+}
+
+const clampByte = v => Math.max(0, Math.min(255, Math.round(v)));
+
+function shade(hex, f) {
+  const n = parseInt(hex.slice(1), 16);
+  return 'rgb(' + clampByte(((n >> 16) & 255) * f) + ',' +
+                 clampByte(((n >> 8) & 255) * f) + ',' +
+                 clampByte((n & 255) * f) + ')';
+}
+
+// 与原版一致：实心六边形 + 内层高光 + 深色描边
+function drawCell(g, cx, cy, s, color) {
+  hexPath(g, cx, cy, s);
+  g.fillStyle = color;
+  g.fill();
+  hexPath(g, cx, cy, s * 0.58);
+  g.fillStyle = shade(color, 1.35);
+  g.fill();
+  hexPath(g, cx, cy, s);
+  g.lineWidth = Math.max(1, s * 0.13);
+  g.strokeStyle = shade(color, 0.45);
+  g.stroke();
+}
+
+function drawBoard() {
+  // 先画所有空格轮廓（样式只设一次），再画已落定的方块；
+  // 否则 drawCell 改过的 strokeStyle 会泄漏给后面的空格。
+  ctx.lineWidth = Math.max(1, S * 0.1);
+  ctx.strokeStyle = '#2e4e42';
+  for (const [q, r] of BOARD_CELLS) {
+    if (state.filled.has(kk(q, r))) continue;
+    hexPath(ctx, cellX(q), cellY(q, r), S);
+    ctx.stroke();
+  }
+  for (const cell of state.filled.values())
+    drawCell(ctx, cellX(cell.q), cellY(cell.q, cell.r), S, cell.c);
+
+  const p = state.piece;
+  if (state.gameOver || !p) return;
+
+  const color = COLORS[p.name];
+  ctx.strokeStyle = shade(color, 1.05);
+  ctx.lineWidth = Math.max(1.5, S * 0.14);
+  const lr = landingAnchor();
+  for (const [q, r] of cellsAt(p, p.q, lr)) {
+    if (!BOARD_SET.has(kk(q, r)) || state.filled.has(kk(q, r))) continue;
+    hexPath(ctx, cellX(q), cellY(q, r), S * 0.9);
+    ctx.stroke();
+  }
+  for (const [q, r] of curCells()) drawCell(ctx, cellX(q), cellY(q, r), S, color);
+}
+
+function drawPreview() {
+  const w = nextCanvas.clientWidth || 56, h = nextCanvas.clientHeight || 40;
+  nextCtx.clearRect(0, 0, w, h);
+  if (!state.next) return;
+  const name = state.next;
+  const pts = PIECES[name].map(([q, r]) => [1.5 * q, Math.sqrt(3) * (r + q / 2)]);
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const minX = Math.min(...xs) - 1, maxX = Math.max(...xs) + 1;
+  const minY = Math.min(...ys) - Math.sqrt(3) / 2;
+  const maxY = Math.max(...ys) + Math.sqrt(3) / 2;
+  const size = Math.min(w * 0.94 / (maxX - minX), h * 0.94 / (maxY - minY));
+  const ox = w / 2 - (minX + maxX) / 2 * size;
+  const oy = h / 2 - (minY + maxY) / 2 * size;
+  for (const [x, y] of pts) drawCell(nextCtx, ox + x * size, oy + y * size, size, COLORS[name]);
+}
+
+/* ================================================================ HUD */
+const vScore = el('vScore'), vBest = el('vBest'), vLines = el('vLines'), vLevel = el('vLevel');
+const hudCache = { score: -1, best: -1, lines: -1, level: -1 };
+
+function updateHud() {
+  const best = bestScore();
+  if (hudCache.score !== state.score) { hudCache.score = state.score; vScore.textContent = state.score; }
+  if (hudCache.best !== best) { hudCache.best = best; vBest.textContent = best; }
+  if (hudCache.lines !== state.lines) { hudCache.lines = state.lines; vLines.textContent = state.lines; }
+  if (hudCache.level !== state.level) { hudCache.level = state.level; vLevel.textContent = state.level; }
+}
+
+function updateIcons() {
+  btnSound.textContent = soundOn ? '\u{1F50A}' : '\u{1F507}';
+  btnSound.setAttribute('aria-label', soundOn ? T.soundOn : T.soundOff);
+  btnPause.textContent = state.paused ? '\u25B6' : '\u23F8';
+  btnPause.setAttribute('aria-label', T.pause);
+}
+
+const esc = s => String(s).replace(/[&<>"']/g,
+  c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const fmt = (s, ...args) => s.replace(/%d/g, () => args.shift());
+
+function top5Html() {
+  if (!scores.length) return '<p>' + esc(T.noRecords) + '</p>';
+  const best = bestScore();
+  return '<div class="hs">' + scores.map((e, i) =>
+    '<div class="hs-row' + (e.score === best ? ' top' : '') + '">' +
+      '<span class="hs-i">' + (i + 1) + '</span>' +
+      '<span class="hs-n">' + esc(e.name) + '</span>' +
+      '<span class="hs-s">' + e.score + '</span>' +
+    '</div>').join('') + '</div>';
+}
+
+function hideOverlay() {
+  overlay.classList.remove('show');
+  ovCard.innerHTML = '';
+}
+
+function showPause() {
+  ovCard.innerHTML =
+    '<h2>' + esc(T.paused) + '</h2>' +
+    '<p>' + esc(T.padHelp) + '</p>' +
+    '<p>' + esc(T.gestureHelp) + '</p>' +
+    '<h3>' + esc(T.top5) + '</h3>' + top5Html() +
+    '<div class="row">' +
+      '<button class="primary" data-ov="resume">' + esc(T.resume) + '</button>' +
+      '<button data-ov="restart">' + esc(T.restart) + '</button>' +
+    '</div>';
+  overlay.classList.add('show');
+}
+
+function showGameOver() {
+  let html = '<h2>' + esc(T.gameOver) + '</h2>' +
+             '<p class="big">' + esc(fmt(T.scoreLine, state.score)) + '</p>';
+  if (state.nameEntry !== null) {
+    html += '<p>' + esc(fmt(T.newRecord, 10)) + '</p>' +
+            '<input id="nameInput" maxlength="10" autocomplete="off" spellcheck="false">' +
+            '<button class="primary" data-ov="save">' + esc(T.confirm) + '</button>';
+  } else {
+    html += state.lastRank
+      ? '<p class="rank">' + esc(fmt(T.rank, state.lastRank, bestScore())) + '</p>'
+      : '<p class="rank">' + esc(fmt(T.bestOnly, bestScore())) + '</p>';
+    html += '<h3>' + esc(T.top5) + '</h3>' + top5Html() +
+            '<div class="row"><button class="primary" data-ov="restart">' +
+            esc(T.again) + '</button></div>';
+  }
+  ovCard.innerHTML = html;
+  overlay.classList.add('show');
+
+  const input = el('nameInput');
+  if (input) {
+    input.value = state.nameEntry;
+    input.addEventListener('input', () => { state.nameEntry = input.value; });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); submitName(); }
+    });
+  }
+}
+
+ovCard.addEventListener('click', e => {
+  const btn = e.target.closest('[data-ov]');
+  if (!btn) return;
+  const act = btn.dataset.ov;
+  if (act === 'resume') {
+    state.paused = false;
+    play('pause');
+    hideOverlay();
+    updateIcons();
+  } else if (act === 'restart') {
+    reset();
+  } else if (act === 'save') {
+    submitName();
+  }
+});
+
+function togglePause() {
+  if (state.gameOver) return;
+  state.paused = !state.paused;
+  state.dasDir = 0;
+  state.softButton = false;
+  state.softTouch = false;
+  play('pause');
+  if (state.paused) showPause(); else hideOverlay();
+  updateIcons();
+}
+
+function toggleSound() {
+  soundOn = !soundOn;
+  writeFlag(SOUND_KEY, soundOn);
+  if (master) master.gain.value = soundOn ? 0.16 : 0;
+  updateIcons();
+}
+
+/* ================================================================ 输入 */
+function doAction(act) {
+  if (act === 'pause') { togglePause(); return; }
+  if (act === 'sound') { toggleSound(); return; }
+  if (state.gameOver || state.paused) return;
+  if (state.spawnTimer > 0) return;        // 落定后的短暂停顿
+  switch (act) {
+    case 'left':  moveLateral(-1); state.dasDir = -1; state.dasTimer = DAS; break;
+    case 'right': moveLateral(1); state.dasDir = 1; state.dasTimer = DAS; break;
+    case 'cw':    tryRotate(1); break;
+    case 'ccw':   tryRotate(-1); break;
+    case 'drop':  hardDrop(); break;
+    case 'down':  break;                   // 由软降标志驱动，见 update()
+  }
+}
+
+/* ---------------------------------------------------------- 底部按钮 */
+const PAD_BUTTONS = [
+  ['left', '\u2190', 'left'], ['down', '\u2193', 'down'], ['right', '\u2192', 'right'],
+  ['cw', '\u21BB', 'cw'], ['ccw', '\u21BA', 'ccw'], ['drop', '\u2913', 'drop'],
+];
+
+for (const [act, glyph, label] of PAD_BUTTONS) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.dataset.act = act;
+  btn.innerHTML = '<span class="g">' + glyph + '</span><span class="t">' +
+                  esc(T.pad[label]) + '</span>';
+  pad.appendChild(btn);
+}
+
+const holds = new Map();      // pointerId -> { act, btn }
+
+pad.addEventListener('pointerdown', e => {
+  const btn = e.target.closest('button[data-act]');
+  if (!btn) return;
+  e.preventDefault();
+  unlockAudio();
+  try { btn.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
+  const act = btn.dataset.act;
+  holds.set(e.pointerId, { act, btn });
+  btn.classList.add('on');
+  doAction(act);
+  if (act === 'down') state.softButton = true;
+});
+
+function releasePad(e) {
+  const rec = holds.get(e.pointerId);
+  if (!rec) return;
+  holds.delete(e.pointerId);
+  rec.btn.classList.remove('on');
+  if (rec.act === 'down') state.softButton = false;
+  if ((rec.act === 'left' && state.dasDir < 0) ||
+      (rec.act === 'right' && state.dasDir > 0)) state.dasDir = 0;
+}
+pad.addEventListener('pointerup', releasePad);
+pad.addEventListener('pointercancel', releasePad);
+
+/* ------------------------------------------------------------ 手势 */
+let gesture = null;
+
+boardWrap.addEventListener('pointerdown', e => {
+  if (state.paused || state.gameOver) return;
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  e.preventDefault();
+  unlockAudio();
+  gesture = {
+    id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX,
+    t0: performance.now(), moved: false,
+  };
+  state.softTouch = false;
+  try { boardWrap.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
+});
+
+boardWrap.addEventListener('pointermove', e => {
+  if (!gesture || e.pointerId !== gesture.id) return;
+  const step = Math.max(14, HEX_W * 0.8);         // 拖过一格距就移动一列
+  let dx = e.clientX - gesture.x;
+  while (dx >= step) { moveLateral(1); gesture.x += step; dx = e.clientX - gesture.x; }
+  while (dx <= -step) { moveLateral(-1); gesture.x -= step; dx = e.clientX - gesture.x; }
+
+  const dxTotal = e.clientX - gesture.x0, dyTotal = e.clientY - gesture.y0;
+  if (Math.abs(dxTotal) > 10 || Math.abs(dyTotal) > 10) gesture.moved = true;
+  state.softTouch = dyTotal > Math.max(16, HEX_H * 0.9) &&
+                    Math.abs(dyTotal) > Math.abs(dxTotal);
+});
+
+function endGesture(e) {
+  if (!gesture || e.pointerId !== gesture.id) return;
+  const g = gesture;
+  gesture = null;
+  state.softTouch = false;
+  const dx = e.clientX - g.x0, dy = e.clientY - g.y0;
+  const dt = performance.now() - g.t0;
+  if (!g.moved && dt < 300) { tryRotate(1); return; }            // 轻点 = 顺时针
+  if (dy > 56 && dt < 260 && dy > Math.abs(dx) * 1.6) hardDrop(); // 下甩 = 硬降
+}
+boardWrap.addEventListener('pointerup', endGesture);
+boardWrap.addEventListener('pointercancel', e => {
+  if (gesture && e.pointerId === gesture.id) { gesture = null; state.softTouch = false; }
+});
+
+/* ---------------------------------------------------------- 键盘 */
+const KEYMAP = {
+  ArrowLeft: 'left', a: 'left', A: 'left',
+  ArrowRight: 'right', d: 'right', D: 'right',
+  ArrowDown: 'down', s: 'down', S: 'down',
+  ArrowUp: 'cw', x: 'cw', X: 'cw', w: 'cw', W: 'cw',
+  z: 'ccw', Z: 'ccw',
+  ' ': 'drop',
+};
+
+addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'INPUT') return;
+  const k = e.key;
+  if (k === 'p' || k === 'P') { e.preventDefault(); togglePause(); return; }
+  if (k === 'm' || k === 'M') { toggleSound(); return; }
+  if (k === 'r' || k === 'R') { reset(); return; }
+  if (k === 'Escape') { if (state.gameOver) reset(); else togglePause(); return; }
+  const act = KEYMAP[k];
+  if (!act) return;
+  e.preventDefault();
+  if (e.repeat) return;                 // 连发交给 DAS
+  unlockAudio();
+  if (act === 'down') { state.softButton = true; return; }
+  doAction(act);
+});
+
+addEventListener('keyup', e => {
+  const act = KEYMAP[e.key];
+  if (act === 'down') state.softButton = false;
+  else if (act === 'left' && state.dasDir < 0) state.dasDir = 0;
+  else if (act === 'right' && state.dasDir > 0) state.dasDir = 0;
+});
+
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && !state.paused && !state.gameOver) togglePause();
+});
+
+/* ============================================================ 主循环 */
+function update(dt) {
+  if (state.gameOver || state.paused) return;
+  if (state.spawnTimer > 0) { state.spawnTimer = Math.max(0, state.spawnTimer - dt); return; }
+
+  if (state.dasDir) {
+    state.dasTimer -= dt;
+    if (state.dasTimer <= 0) {
+      state.dasTimer = DAS_REPEAT;
+      moveLateral(state.dasDir);
+    }
+  }
+
+  const soft = state.softButton || state.softTouch;
+  const interval = soft ? SOFT_DROP_MS : gravityMs();
+
+  if (canFall()) {
+    state.dropTimer += dt;
+    if (state.dropTimer >= interval) {
+      state.dropTimer = 0;
+      tryMove(DOWN[0], DOWN[1]);
+      if (soft) state.score += 1;
+    }
+  } else {
+    state.lockTimer += dt;
+    if (state.lockTimer >= LOCK_DELAY) lock();
+  }
+}
+
+let lastTime = 0;
+
+function frame(t) {
+  requestAnimationFrame(frame);
+  if (!lastTime) lastTime = t;
+  const dt = Math.min(100, t - lastTime);
+  lastTime = t;
+  update(dt);
+  updateHud();
+  ctx.clearRect(0, 0, viewW, viewH);
+  drawBoard();
+}
+
+/* ============================================================== 启动 */
+el('lScore').textContent = T.score;
+el('lBest').textContent = T.best;
+el('lLines').textContent = T.lines;
+el('lLevel').textContent = T.level;
+el('lNext').textContent = T.next;
+
+btnSound.addEventListener('click', () => { unlockAudio(); toggleSound(); });
+btnPause.addEventListener('click', () => { unlockAudio(); togglePause(); });
+
+resize();
+if (window.ResizeObserver) new ResizeObserver(resize).observe(boardWrap);
+else addEventListener('resize', resize);
+updateIcons();
+reset();
+requestAnimationFrame(frame);
+
+// 自检 / 调试入口
+window.__hex = {
+  state, reset, spawn, cellsAt, curCells, fits, tryMove, tryRotate, moveLateral, hardDrop,
+  lock, update, clearFullLines, drawName, drawBoard, drawPreview, resize, doAction,
+  BOARD_CELLS, BOARD_SET, ROWS, PIECES, REL, LATERAL, kk,
+  has: (q, r) => state.filled.has(kk(q, r)),
+};
+})();
+</script>
+</body>
+</html>
