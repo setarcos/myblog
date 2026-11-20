@@ -44,6 +44,10 @@ weight = 40
     [markup.goldmark.renderer]
       unsafe = true
 
+# Resolve relative links to other content files (e.g. [x](zephyr.md))
+    [markup.goldmark.renderHooks.link]
+      useEmbedded = 'always'
+
 # Allow the Tailwind CLI used by the hugo-void theme (css.TailwindCSS)
 [security.exec]
   allow = ['^(dart-)?sass(-embedded)?$', '^go$', '^git$', '^postcss$', '^node$', '^tailwindcss$']
