@@ -44,6 +44,7 @@
     background: #141c24; color: #dfe9e4; font: inherit; font-size: 15px;
   }
   .icon:active { background: #1e3a32; }
+  .icon.dim { opacity: .42; }
 
   /* -------------------------------------------------------------- board */
   #boardWrap { grid-area: board; position: relative; min-width: 0; min-height: 0; touch-action: none; }
@@ -123,6 +124,7 @@
     <div class="stat"><span id="lLevel">等级</span><b id="vLevel">1</b></div>
     <div class="spacer"></div>
     <div class="next"><span id="lNext">NEXT</span><canvas id="next"></canvas></div>
+    <button id="btnAnim" class="icon" type="button">&#10023;</button>
     <button id="btnSound" class="icon" type="button">&#128266;</button>
     <button id="btnPause" class="icon" type="button">&#9208;</button>
   </header>
@@ -148,6 +150,7 @@ const STRINGS = {
     padHelp: '← ↓ → 移动 / 加速 · ↻ ↺ 旋转 · ⤓ 硬降',
     gestureHelp: '手势：左右滑移动 · 下滑软降 · 下甩硬降 · 轻点旋转',
     anon: '无名玩家', pause: '暂停', soundOn: '关闭音效', soundOff: '打开音效',
+    animOn: '关闭消行动画', animOff: '打开消行动画',
     pad: { left: '左移', down: '软降', right: '右移', cw: '顺旋', ccw: '逆旋', drop: '硬降' },
   },
   en: {
@@ -161,6 +164,7 @@ const STRINGS = {
     padHelp: '← ↓ → move / soft drop · ↻ ↺ rotate · ⤓ hard drop',
     gestureHelp: 'Touch: swipe to move · drag down to drop · flick to slam · tap to rotate',
     anon: 'Anonymous', pause: 'Pause', soundOn: 'Mute', soundOff: 'Unmute',
+    animOn: 'Turn off clear animation', animOff: 'Turn on clear animation',
     pad: { left: 'Left', down: 'Down', right: 'Right', cw: 'CW', ccw: 'CCW', drop: 'Drop' },
   },
 };
@@ -265,8 +269,10 @@ const SOUND_SPECS = {
 };
 
 const SOUND_KEY = 'hexTetris.sound', SCORE_KEY = 'hexTetris.scores';
+const ANIM_KEY = 'hexTetris.anim';
 let acx = null, master = null;
 let soundOn = readFlag(SOUND_KEY, true);
+let clearAnimOn = readFlag(ANIM_KEY, false);
 
 function readFlag(key, dflt) {
   try { const v = localStorage.getItem(key); return v === null ? dflt : v === '1'; }
@@ -342,7 +348,13 @@ const bestScore = () => (scores.length ? scores[0].score : 0);
 
 /* ================================================================ 状态 */
 const GRAVITY_BASE = 1040, GRAVITY_MIN = 180, LOCK_DELAY = 840;
+// 贴地后移动/旋转可以重置锁延迟，但最多这么多次。没有上限时在底部原地连按
+// 就能一直刷新计时，方块永远不落定。
+const LOCK_RESET_MAX = 15;
 const DAS = 340, DAS_REPEAT = 110, SOFT_DROP_MS = 55, SPAWN_PAUSE = 150;
+// 消行动画：被消的格子先高亮闪一下，上方的方块再平滑落到最终位置。
+// 时长与 Python 版一致；C 键或右上角 ✦ 按钮切换。
+const CLEAR_FLASH_MS = 150, CLEAR_FALL_MS = 240;
 const DOWN = [0, 1];
 // 左右跨一列有两种竖向分量，同方向连按时交替（斜下 → 斜上 → 斜下 …），
 // 连按左右就是横着走；首选被挡时改走另一斜向。
@@ -354,10 +366,12 @@ const KICKS = [[0, 0], [-1, 1], [1, 0], [0, 1], [0, -1], [-1, 0], [1, -1]];
 
 const state = {
   filled: new Map(),          // kk(q,r) -> { q, r, c }
+  clearAnim: null,            // 消行动画进行中的状态（见 settleClear）
   score: 0, lines: 0, level: 1,
   gameOver: false, paused: false,
   piece: null, next: null, bag: [],
-  dropTimer: 0, lockTimer: 0, spawnTimer: 0,
+  dropTimer: 0, lockTimer: 0, lockResets: 0, touchedDown: false, spawnTimer: 0,
+  fallLevel: 0,
   dasDir: 0, dasTimer: 0,
   lateralDir: 0, lateralNextUp: false,   // 同方向连按时竖向上下交替
   softButton: false, softTouch: false,
@@ -392,20 +406,43 @@ const curCells = () => cellsAt(state.piece, state.piece.q, state.piece.r);
 const fits = cells =>
   cells.every(([q, r]) => BOARD_SET.has(kk(q, r)) && !state.filled.has(kk(q, r)));
 const canFall = () => fits(cellsAt(state.piece, state.piece.q, state.piece.r + 1));
+
+// 六边形相邻列正好错开半格：跨一列时竖向不是 +半格就是 -半格。fallLevel 记录方块
+// 下落到达过的最低位置（halfLevel 的单位就是半格），横向跨列只允许在它上方半格
+// 以内，否则贴地/被挡时连按同一方向就能一遍遍走斜上，一路往上爬。基准只跟着落到
+// “新低”下移，所以正常下落、斜下跨列都不受限，被挡住的只有“凭空爬高”。
+const halfLevel = (q, r) => 2 * r + q;
+function resetFallLevel() {
+  const p = state.piece;
+  state.fallLevel = p ? halfLevel(p.q, p.r) : 0;
+}
+
+// 落到新低：基准下移，锁延迟和刷新额度重新算。只认“往前没到过”的高度，否则抬起
+// 后再落回同一位置就能把额度一直补满，方块可以在原地无限悬停。
+function reach(level) {
+  if (level <= state.fallLevel) return false;
+  state.fallLevel = level;
+  state.lockTimer = 0;
+  state.lockResets = 0;
+  return true;
+}
 const gravityMs = () => Math.max(GRAVITY_MIN, GRAVITY_BASE - (state.level - 1) * 90);
 
 function reset() {
   state.filled.clear();
+  state.clearAnim = null;
   state.score = 0; state.lines = 0; state.level = 1;
   state.gameOver = false; state.paused = false;
   state.nameEntry = null; state.lastRank = null;
   state.bag = [];
-  state.dropTimer = 0; state.lockTimer = 0; state.spawnTimer = 0;
+  state.dropTimer = 0; state.lockTimer = 0; state.lockResets = 0;
+  state.touchedDown = false; state.spawnTimer = 0;
   state.dasDir = 0; state.dasTimer = 0;
   state.lateralDir = 0; state.lateralNextUp = false;
   state.softButton = false; state.softTouch = false;
   state.piece = spawn(drawName());
   state.next = drawName();
+  resetFallLevel();
   hideOverlay();
   updateIcons();
   if (!state.piece) finishGame();
@@ -418,14 +455,31 @@ function tryMove(dq, dr) {
   const p = state.piece;
   if (!p) return false;
   if (!fits(cellsAt(p, p.q + dq, p.r + dr))) return false;
+  const level = halfLevel(p.q + dq, p.r + dr);
+  const isDown = dq === DOWN[0] && dr === DOWN[1];
+  // 比下落到达过的最低位置高出半格以上: 这一步就是在凭空爬高, 挡掉
+  if (!isDown && level < state.fallLevel - 1) return false;
+  const rested = !canFall();
   p.q += dq; p.r += dr;
-  state.lockTimer = 0;
+  if (!reach(level) && !isDown) afterShift(rested);
+  if (!canFall()) state.touchedDown = true;
   if (dq !== 0) play('move');              // 只有左右跨列才响
   return true;
 }
 
+// 移动/旋转成功后处理锁延迟计时。只有贴地时的移动/旋转才刷新计时，而且总共只有
+// LOCK_RESET_MAX 次（落到新低时由 reach 补满）。悬空时既不清零也不暂停（见 update），
+// 否则在底部用斜上移动反复“抬起-落回”就能一直拖延落定。
+function afterShift(rested) {
+  if (rested && state.lockResets < LOCK_RESET_MAX) {
+    state.lockResets += 1;
+    state.lockTimer = 0;
+  }
+}
+
 // 跨一列：dir 为 -1 向左、+1 向右。同一方向连按时竖向交替：斜下 → 斜上 → 斜下…
-// 轮到的那一步被墙或方块挡住时，改走同方向的另一斜向。
+// 轮到的那一步被墙或方块挡住时，改走同方向的另一斜向。每一步都不能比下落到达过
+// 的位置高出半格以上（见 tryMove），所以被挡住时不会顺着斜上一路爬高。
 function moveLateral(dir) {
   const [down, up] = LATERAL[dir];
   const first = (state.lateralDir === dir && state.lateralNextUp) ? up : down;
@@ -445,13 +499,18 @@ function tryRotate(dir) {
   if (!p) return false;
   const rot = (p.rot + (dir > 0 ? 1 : -1) + 6) % 6;
   const rel = REL[p.name][rot];
+  const rested = !canFall();
   for (const [dq, dr] of KICKS) {
-    if (fits(rel.map(([cq, cr]) => [cq + p.q + dq, cr + p.r + dr]))) {
-      p.rot = rot; p.q += dq; p.r += dr;
-      state.lockTimer = 0;
-      play('rotate');
-      return true;
-    }
+    const q = p.q + dq, r = p.r + dr;
+    if (!fits(rel.map(([cq, cr]) => [cq + q, cr + r]))) continue;
+    // 踢墙也不许把方块抬到下落到达的位置之上半格以上, 否则连按旋转
+    // （抬一整行 → 反方向原地转 → 重力落回）就能一级级往上爬
+    if (halfLevel(q, r) < state.fallLevel - 1) continue;
+    p.rot = rot; p.q = q; p.r = r;
+    if (!reach(halfLevel(q, r))) afterShift(rested);
+    if (!canFall()) state.touchedDown = true;
+    play('rotate');
+    return true;
   }
   return false;
 }
@@ -472,38 +531,86 @@ function hardDrop() {
   lock();
 }
 
-// 原地消除所有填满的 8 格整行，上方方块整体下落，返回消除行数
-function clearFullLines(filled) {
-  const full = ROWS.filter(row =>
-    row.length === 8 && row.every(([q, r]) => filled.has(kk(q, r))));
-  if (!full.length) return 0;
+// 当前被填满的整行（正好 8 格）
+const fullRows = filled => ROWS.filter(row =>
+  row.length === 8 && row.every(([q, r]) => filled.has(kk(q, r))));
 
-  const removedByCol = new Map();
+// 消掉这些行并让上方方块下落，返回消行后的棋盘（不改动 filled）
+function planClear(filled, full) {
+  // 两条行可能共享中间端点的格子（如 (0,11) 既在左下边也在右下边），
+  // 按列记消格时要去重，否则同一格会被算成两格、中间列多落一格。
+  const removed = new Set(), removedByCol = new Map();
   for (const row of full)
     for (const [q, r] of row) {
-      if (!removedByCol.has(q)) removedByCol.set(q, []);
-      removedByCol.get(q).push(r);
-      filled.delete(kk(q, r));
+      removed.add(kk(q, r));
+      if (!removedByCol.has(q)) removedByCol.set(q, new Set());
+      removedByCol.get(q).add(r);
     }
 
   const settled = new Map();
-  for (const cell of filled.values()) {
-    const gone = removedByCol.get(cell.q) || [];
-    const down = gone.filter(r => r > cell.r).length;
-    const r = cell.r + down;
-    settled.set(kk(cell.q, r), { q: cell.q, r, c: cell.c });
+  for (const [k, cell] of filled) {
+    if (removed.has(k)) continue;
+    // 同一列中位于被消格子上方的方块，下落格数 = 该列被消去的格子数
+    let down = 0;
+    const gone = removedByCol.get(cell.q);
+    if (gone) for (const r of gone) if (r > cell.r) down++;
+    settled.set(kk(cell.q, cell.r + down), { ...cell, r: cell.r + down });
   }
+  return settled;
+}
+
+// 反复“消行 + 下落”直到再没有满行。各列下落格数不同，消完一行后上面的方块可能
+// 又凑出新的满行 —— 必须当场接着消，否则会留下一条早就填满的斜线，等到下一块
+// 落定时才突然消掉（看上去像在别处落子却消了这边的行）。
+// 返回 { removed, settled, falls, n }：
+//   removed  最终被消掉的格子（原始坐标，kk 键）
+//   settled  最终棋盘（Map）
+//   falls    需要下落的方块 [{ q0, r0, q, r, c }]，供动画使用
+//   n        一共消掉的行数
+function settleClear(filled) {
+  let todo = fullRows(filled);
+  if (!todo.length) return { removed: new Set(), settled: null, falls: [], n: 0 };
+
+  // 值里带上原始坐标：连消几轮后也能知道每格最后落在哪里
+  let board = new Map();
+  for (const [k, cell] of filled)
+    board.set(k, { q: cell.q, r: cell.r, c: cell.c, oq: cell.q, or: cell.r });
+
+  let n = 0;
+  while (todo.length) {
+    n += todo.length;
+    board = planClear(board, todo);
+    todo = fullRows(board);
+  }
+
+  const settled = new Map(), falls = [], alive = new Set();
+  for (const [k, cell] of board) {
+    settled.set(k, { q: cell.q, r: cell.r, c: cell.c });
+    alive.add(kk(cell.oq, cell.or));
+    if (cell.q !== cell.oq || cell.r !== cell.or)
+      falls.push({ q0: cell.oq, r0: cell.or, q: cell.q, r: cell.r, c: cell.c });
+  }
+  const removed = new Set();
+  for (const k of filled.keys()) if (!alive.has(k)) removed.add(k);
+  return { removed, settled, falls, n };
+}
+
+// 原地反复消除所有填满的 8 格整行，上方方块整体下落，返回消除行数
+function clearFullLines(filled) {
+  const { settled, n } = settleClear(filled);
+  if (!n) return 0;
   filled.clear();
   for (const [k, v] of settled) filled.set(k, v);
-  return full.length;
+  return n;
 }
 
 function lock() {
   const p = state.piece;
   const color = COLORS[p.name];
   for (const [q, r] of curCells()) state.filled.set(kk(q, r), { q, r, c: color });
+  state.piece = null;                    // 消行动画期间没有活动方块
 
-  const n = clearFullLines(state.filled);
+  const { removed, settled, falls, n } = settleClear(state.filled);
   let leveled = false;
   if (n) {
     const table = { 1: 100, 2: 400, 3: 900 };
@@ -513,21 +620,44 @@ function lock() {
     leveled = lv > state.level;
     state.level = lv;
     play(n >= 3 ? 'clear3' : 'clear' + n);
+    if (clearAnimOn) {
+      state.clearAnim = { removed, settled, falls, t: 0 };
+    } else {
+      state.filled.clear();
+      for (const [k, v] of settled) state.filled.set(k, v);
+    }
   } else {
     play('lock');
   }
   if (leveled) play('level');
 
+  if (!state.clearAnim) spawnNext();
+  updateHud();
+}
+
+// 落定（或消行动画结束）后生成下一个方块
+function spawnNext() {
   state.piece = spawn(state.next);
   state.next = drawName();
+  resetFallLevel();
   state.lateralDir = 0;
   state.lateralNextUp = false;
   state.dropTimer = 0;
   state.lockTimer = 0;
+  state.lockResets = 0;
+  state.touchedDown = false;
   state.spawnTimer = SPAWN_PAUSE;
-  updateHud();
   drawPreview();
   if (!state.piece) finishGame();
+}
+
+// 消行动画结束：换成算好的新棋盘，再生成下一块
+function finishClearAnim() {
+  const anim = state.clearAnim;
+  state.clearAnim = null;
+  state.filled.clear();
+  for (const [k, v] of anim.settled) state.filled.set(k, v);
+  spawnNext();
 }
 
 /* --------------------------------------------------------- 最高分结算 */
@@ -564,6 +694,7 @@ const nextCanvas = el('next'), nextCtx = nextCanvas.getContext('2d');
 const boardWrap = el('boardWrap');
 const overlay = el('overlay'), ovCard = el('ovCard');
 const btnSound = el('btnSound'), btnPause = el('btnPause'), pad = el('pad');
+const btnAnim = el('btnAnim');
 
 let S = 10, HEX_W = 15, HEX_H = 17.32, OX = 0, OY = 0, viewW = 0, viewH = 0;
 
@@ -612,6 +743,15 @@ function shade(hex, f) {
                  clampByte((n & 255) * f) + ')';
 }
 
+// 向白色混合（消行闪烁的高亮）
+function blendWhite(hex, t) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return 'rgb(' + clampByte(r + (255 - r) * t) + ',' +
+                 clampByte(g + (255 - g) * t) + ',' +
+                 clampByte(b + (255 - b) * t) + ')';
+}
+
 // 与原版一致：实心六边形 + 内层高光 + 深色描边
 function drawCell(g, cx, cy, s, color) {
   hexPath(g, cx, cy, s);
@@ -627,17 +767,41 @@ function drawCell(g, cx, cy, s, color) {
 }
 
 function drawBoard() {
+  const anim = state.clearAnim;
+  const phase = animPhase();
+  // 本帧不按原位画的格子：已消掉的，以及正在下落的
+  const hidden = new Set();
+  if (anim && !phase.flashing) {
+    for (const k of anim.removed) hidden.add(k);
+    for (const f of anim.falls) hidden.add(kk(f.q0, f.r0));
+  }
+
   // 先画所有空格轮廓（样式只设一次），再画已落定的方块；
   // 否则 drawCell 改过的 strokeStyle 会泄漏给后面的空格。
   ctx.lineWidth = Math.max(1, S * 0.1);
   ctx.strokeStyle = '#2e4e42';
   for (const [q, r] of BOARD_CELLS) {
-    if (state.filled.has(kk(q, r))) continue;
+    if (state.filled.has(kk(q, r)) || hidden.has(kk(q, r))) continue;
     hexPath(ctx, cellX(q), cellY(q, r), S);
     ctx.stroke();
   }
-  for (const cell of state.filled.values())
-    drawCell(ctx, cellX(cell.q), cellY(cell.q, cell.r), S, cell.c);
+  for (const [k, cell] of state.filled) {
+    if (hidden.has(k)) continue;
+    const glow = anim && phase.flashing && anim.removed.has(k);
+    const color = glow
+      ? blendWhite(cell.c, 0.85 * Math.sin(Math.PI * phase.p))
+      : cell.c;
+    drawCell(ctx, cellX(cell.q), cellY(cell.q, cell.r), S, color);
+  }
+
+  if (anim && !phase.flashing) {           // 下落中的方块按插值位置画
+    const t = phase.p * phase.p * (3 - 2 * phase.p);
+    for (const f of anim.falls) {
+      const x0 = cellX(f.q0), y0 = cellY(f.q0, f.r0);
+      const x1 = cellX(f.q), y1 = cellY(f.q, f.r);
+      drawCell(ctx, x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, S, f.c);
+    }
+  }
 
   const p = state.piece;
   if (state.gameOver || !p) return;
@@ -674,6 +838,14 @@ function drawPreview() {
 const vScore = el('vScore'), vBest = el('vBest'), vLines = el('vLines'), vLevel = el('vLevel');
 const hudCache = { score: -1, best: -1, lines: -1, level: -1 };
 
+// 消行动画进度：闪烁阶段 / 下落阶段，p 为阶段内进度 0..1
+function animPhase() {
+  const a = state.clearAnim;
+  if (!a) return { flashing: false, p: 0 };
+  if (a.t < CLEAR_FLASH_MS) return { flashing: true, p: a.t / CLEAR_FLASH_MS };
+  return { flashing: false, p: Math.min(1, (a.t - CLEAR_FLASH_MS) / CLEAR_FALL_MS) };
+}
+
 function updateHud() {
   const best = bestScore();
   if (hudCache.score !== state.score) { hudCache.score = state.score; vScore.textContent = state.score; }
@@ -685,6 +857,10 @@ function updateHud() {
 function updateIcons() {
   btnSound.textContent = soundOn ? '\u{1F50A}' : '\u{1F507}';
   btnSound.setAttribute('aria-label', soundOn ? T.soundOn : T.soundOff);
+  btnAnim.textContent = clearAnimOn ? '\u2726' : '\u2727';
+  btnAnim.setAttribute('aria-label', clearAnimOn ? T.animOn : T.animOff);
+  btnAnim.setAttribute('title', clearAnimOn ? T.animOn : T.animOff);
+  btnAnim.classList.toggle('dim', !clearAnimOn);
   btnPause.textContent = state.paused ? '\u25B6' : '\u23F8';
   btnPause.setAttribute('aria-label', T.pause);
 }
@@ -785,12 +961,19 @@ function toggleSound() {
   updateIcons();
 }
 
+function toggleClearAnim() {
+  clearAnimOn = !clearAnimOn;
+  writeFlag(ANIM_KEY, clearAnimOn);
+  updateIcons();
+}
+
 /* ================================================================ 输入 */
 function doAction(act) {
   if (act === 'pause') { togglePause(); return; }
   if (act === 'sound') { toggleSound(); return; }
+  if (act === 'anim') { toggleClearAnim(); return; }
   if (state.gameOver || state.paused) return;
-  if (state.spawnTimer > 0) return;        // 落定后的短暂停顿
+  if (state.spawnTimer > 0 || state.clearAnim) return;   // 落定后的停顿 / 消行动画
   switch (act) {
     case 'left':  moveLateral(-1); state.dasDir = -1; state.dasTimer = DAS; break;
     case 'right': moveLateral(1); state.dasDir = 1; state.dasTimer = DAS; break;
@@ -902,6 +1085,7 @@ addEventListener('keydown', e => {
   const k = e.key;
   if (k === 'p' || k === 'P') { e.preventDefault(); togglePause(); return; }
   if (k === 'm' || k === 'M') { toggleSound(); return; }
+  if (k === 'c' || k === 'C') { toggleClearAnim(); return; }
   if (k === 'r' || k === 'R') { reset(); return; }
   if (k === 'Escape') { if (state.gameOver) reset(); else togglePause(); return; }
   const act = KEYMAP[k];
@@ -928,6 +1112,11 @@ document.addEventListener('visibilitychange', () => {
 /* ============================================================ 主循环 */
 function update(dt) {
   if (state.gameOver || state.paused) return;
+  if (state.clearAnim) {
+    state.clearAnim.t += dt;
+    if (state.clearAnim.t >= CLEAR_FLASH_MS + CLEAR_FALL_MS) finishClearAnim();
+    return;
+  }
   if (state.spawnTimer > 0) { state.spawnTimer = Math.max(0, state.spawnTimer - dt); return; }
 
   if (state.dasDir) {
@@ -949,8 +1138,18 @@ function update(dt) {
       if (soft) state.score += 1;
     }
   } else {
+    state.touchedDown = true;
+  }
+
+  // 锁计时从方块第一次贴地起就持续累加（即使随后又被斜上移动抬起），只在真正
+  // 落定时清零——否则“抬起-落回”反复横跳就能无限拖延落定。
+  if (state.touchedDown) {
     state.lockTimer += dt;
-    if (state.lockTimer >= LOCK_DELAY) lock();
+    if (state.lockTimer >= LOCK_DELAY) {
+      // 到期就必须落定: 就算被旋转踢墙/斜上移动支在空中, 也直接落到落点
+      state.piece.r = landingAnchor();
+      lock();
+    }
   }
 }
 
@@ -975,6 +1174,7 @@ el('lLevel').textContent = T.level;
 el('lNext').textContent = T.next;
 
 btnSound.addEventListener('click', () => { unlockAudio(); toggleSound(); });
+btnAnim.addEventListener('click', () => { unlockAudio(); toggleClearAnim(); });
 btnPause.addEventListener('click', () => { unlockAudio(); togglePause(); });
 
 resize();
@@ -987,8 +1187,12 @@ requestAnimationFrame(frame);
 // 自检 / 调试入口
 window.__hex = {
   state, reset, spawn, cellsAt, curCells, fits, tryMove, tryRotate, moveLateral, hardDrop,
-  lock, update, clearFullLines, drawName, drawBoard, drawPreview, resize, doAction,
+  lock, update, clearFullLines, settleClear, fullRows, drawName, drawBoard, drawPreview,
+  resize, doAction, afterShift, finishClearAnim, toggleClearAnim,
+  halfLevel, resetFallLevel, reach,
   BOARD_CELLS, BOARD_SET, ROWS, PIECES, REL, LATERAL, kk,
+  CLEAR_FLASH_MS, CLEAR_FALL_MS,
+  animOn: () => clearAnimOn,
   has: (q, r) => state.filled.has(kk(q, r)),
 };
 })();
