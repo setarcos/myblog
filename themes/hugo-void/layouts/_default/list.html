@@ -3,7 +3,7 @@
     <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">{{ .Title }}</h1>
     
     <div class="space-y-16">
-      {{ range .Pages.GroupByDate "2006" }}
+      {{ range .Paginator.Pages.GroupByDate "2006" }}
       <div class="relative">
         <!-- 年份指示器 -->
         <div class="mb-6 flex items-center">
